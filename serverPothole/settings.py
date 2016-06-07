@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'review',
     'web',
     'core',
+    'auto_pothole',
     'rest_framework',
 ]
 

@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls), name='admin'),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'),
         name='api-auth'),
-    url(r'^web/', include('web.urls', namespace='web'))
+    url(r'^web/', include('web.urls', namespace='web')),
+    url(r'^auto_pothole/', include('auto_pothole.urls', namespace='auto_pothole'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
