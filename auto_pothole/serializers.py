@@ -8,7 +8,7 @@ class AutomatedPotholeEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AutomatedPotholes
-        fields = ('id','reporter', 'win_size','vehicle_type', 'latitude', 'longitude', 'classifier_output', 'detection_time')
+        fields = ('id','reporter', 'win_size','vehicle_type', 'latitude', 'longitude', 'classifier_output', 'detection_time', 'classifier_intensity', 'event_speed')
 
 class RideDetailsEntrySerializer(serializers.ModelSerializer):
     #Lat = serializers.CharField(source='latitude')

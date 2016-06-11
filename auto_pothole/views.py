@@ -86,22 +86,21 @@ def cal_features(data,winsize):
     for i in range(len(data)):
         if ( data[half_sec_index][4] != data[i][4] and data[i][4] != data[startIndex][4]):
             feature = getFeatures( data[startIndex:i] )
-            finaldata.append([feature[0], feature[1], data[startIndex][2], data[startIndex][3], data[i][4]])
+            finaldata.append([feature[0], feature[1], data[startIndex][2], data[startIndex][3], data[i][4], data[i][5]])
             
             startIndex = half_sec_index
             half_sec_index = i
 
     feature = getFeatures( data[startIndex:i] )
-    finaldata.append([feature[0], feature[1], data[startIndex][2], data[startIndex][3], data[startIndex][4]])
+    finaldata.append([feature[0], feature[1], data[startIndex][2], data[startIndex][3], data[startIndex][4],data[startIndex][5]])
 
     return finaldata
 
 
 
 def getParsedData(line,winsize):
-    line = line[1:len(line)-2]
+    line = line[1:len(line)-1]
     values = line.split(";")
-
     data = []
     lat = ""
     lon = ""
@@ -221,11 +220,15 @@ class AddPothole(APIView):
             
             features = map(lambda p:[p[0],p[1]], featuresData)
             intensities = []
+            probabilities = []
 
             for i in range(len(features)):
                 feature_vector = features[i]
                 feature_vector = np.array(feature_vector).reshape((1, -1))
                 predicted = clf.predict(feature_vector)
+                probability = clf.predict_proba(feature_vector)
+                probability = probability.tolist()
+                probabilities.append(probability[0][1])
 
                 y = clf.decision_function(feature_vector)
                 w_norm = np.linalg.norm(clf.coef_)
@@ -246,20 +249,18 @@ class AddPothole(APIView):
             lat = featuresData[indexOfMaxIntensity][2]
             lon = featuresData[indexOfMaxIntensity][3]
             time = featuresData[indexOfMaxIntensity][4]
+            probability = probabilities[indexOfMaxIntensity]
+            speed = sum(map(lambda p:float(p[5]), featuresData))/ len(featuresData)
             
-
-            print 'indexOfMaxIntensity = ',indexOfMaxIntensity
             if not vehicle_type:
                 vehicle_type = 'D'        
                 
             dt = datetime.datetime.fromtimestamp((long(time) + offsetTime)/1000.0)
 
             if(flag == False):
-                print "inserting nonpothole info"
-                AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type, win_size=win_size, classifier_output='0', detection_time=dt, latitude=lat, longitude=lon, intensity_score = maxIntensity, partial_distance = partial_distance ).save()
+                AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type, win_size=win_size, classifier_output='0', detection_time=dt, latitude=lat, longitude=lon, classifier_intensity = maxIntensity, partial_distance = partial_distance, classifier_probability = probability, event_speed = speed ).save()
             else:
-                print "inserting pothole info"
-                AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type, win_size=win_size, classifier_output='1', detection_time=dt,latitude=lat, longitude=lon, intensity_score = maxIntensity, partial_distance = partial_distance ).save()
+                AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type, win_size=win_size, classifier_output='1', detection_time=dt,latitude=lat, longitude=lon, classifier_intensity = maxIntensity, partial_distance = partial_distance, classifier_probability = probability, event_speed = speed ).save()
                 
 
         return Response({"success": True}, status=status.HTTP_201_CREATED)
