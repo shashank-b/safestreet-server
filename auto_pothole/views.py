@@ -169,11 +169,11 @@ class AddPothole(APIView):
             print 'invalid reporter_id'
             return Response({"success": False, "error": "Invalid Reporter ID"}, status=status.HTTP_400_BAD_REQUEST)
 
-        values = pothole_event_data.split(':-')
+        values = pothole_event_data.split('Details:-')
 
         print "Reporter = ",reporter
 
-        if(values[0] == 'RideDetails'):
+        if(values[0] == 'Ride'):
             line = values[1]
             values = line[1:len(line)-1]
             keys_values = values.split(';')
@@ -287,3 +287,21 @@ class AllRideDetail(APIView):
 
         total_time = total_time*1000
         return Response({"id":pk,"total_time":long(total_time),"total_distance":total_distance,"pothole_count":pothole_count},status=status.HTTP_200_OK)
+class DummyPost(APIView):
+    def post(self, request):
+        pothole_id =  request.data.get('pothole_id')   
+        classifier_intensity = request.data.get('classifier_intensity')
+        classifier_output = request.data.get('classifier_output')
+        classifier_probability = request.data.get('classifier_probability')
+        event_speed = request.data.get('event_speed')
+        # print classifier_output[1:len(classifier_output)-1],classifier_intensity,pothole_id
+        try:
+            obj = AutomatedPotholes.objects.get(id=pothole_id)
+            obj.classifier_output = classifier_output[1]
+            obj.classifier_intensity = classifier_intensity
+            obj.classifier_probability = classifier_probability
+            obj.event_speed = event_speed
+            obj.save()            
+        except AutomatedPotholes.DoesNotExist:
+            obj = AutomatedPotholes.objects.create(field=new_value)
+        return Response({"success": True}, status=status.HTTP_201_CREATED)

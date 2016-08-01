@@ -72,7 +72,7 @@ function initialize() {
 
     // Create clustering of markers with specified options
     var options = {
-        maxZoom: 19,
+        maxZoom: 17,
         imagePath: '/media/marker_images/m'
     };
     var markerCluster = new MarkerClusterer(map, markers, options);

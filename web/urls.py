@@ -6,5 +6,6 @@ from django.conf.urls import url
 from .views import AllComplaints
 
 urlpatterns = [
-    url(r'^allComplaints', AllComplaints.as_view(), name='all_complaints')
+    url(r'^$', AllComplaints.as_view(), name='all_complaints'),    
+    url(r'^allComplaints$', AllComplaints.as_view(), name='all_complaints')    
 ]
