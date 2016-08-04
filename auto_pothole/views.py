@@ -134,9 +134,9 @@ def getParsedData(line,winsize):
 class AddPothole(APIView):
 
     def get(self, request):
-       automated_potholes = AutomatedPotholes.objects.all()
-       serializer = AutomatedPotholeEntrySerializer(automated_potholes, many=True)
-       return Response(serializer.data)
+        automated_potholes = AutomatedPotholes.objects.all().order_by('-id')[:5000]
+        serializer = AutomatedPotholeEntrySerializer(automated_potholes, many=True)
+        return Response(serializer.data)
 
     """
     APIView for adding automated potholes
