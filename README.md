@@ -4,7 +4,13 @@
 1. Install postgresql (`sudo apt-get install postgresql postgresql-contrib`)
 2. Install postgis (`sudo apt-get install postgresql-9.5-postgis-2.1`)
 3. follow the instructions in the [link]( http://trac.osgeo.org/postgis/wiki/UsersWikiPostGIS22UbuntuPGSQL95Apt ) to install postgresql-9.5-postgis-2.2  
-3. Create user 'potholeuser' with password 'mypass' in psql, create database 'potholedb' with postgis extension in it, grant superuser permission to 'potholeuser'
+4. if you are running postgres9.3 and want to upgrade to postgres9.5 below are the steps to do it. [upgrade-postgres-9.3-to-9.5.md](https://gist.github.com/johanndt/6436bfad28c86b28f794)
+```
+sudo pg_dropcluster 9.5 main --stop
+sudo pg_upgradecluster 9.3 main
+sudo pg_dropcluster 9.3 main
+```
+4. Create user 'potholeuser' with password 'mypass' in psql, create database 'potholedb' with postgis extension in it, grant superuser permission to 'potholeuser'
 commands to be executed in order
    1. `sudo -i -u postgres`
    2. `psql`
