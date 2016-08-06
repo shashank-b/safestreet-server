@@ -144,3 +144,4 @@ staticfiles/*
 !.gitkeep
 
 static/model/*
+db_dump/

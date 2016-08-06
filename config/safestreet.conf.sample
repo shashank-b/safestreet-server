@@ -1,0 +1,49 @@
+# Add this file in /etc/nginx/sites-available/
+# Create folder /var/log/serverPothole/ for logs
+
+server {
+    # EDIT HERE: the listening port
+    listen 81;
+    # Uncomment following line to listen on a particular hostname
+    # server_name bodhitree.cse.iitb.ac.in;
+    client_max_body_size 4G;
+    keepalive_requests 100000;
+    keepalive_timeout 3000;
+    add_header Accept-Ranges bytes;
+
+    # log_format timed_combined '$remote_addr:$remote_port - $sent_http_x_username '
+    #         '[$time_local] "$request" $status $body_bytes_sent '
+    #         '"$http_referer" "$http_user_agent" $server_port '
+    #         '$request_time $upstream_response_time $pipe';
+
+    access_log /var/log/serverPothole/nginx-access.log ;
+    error_log /var/log/serverPothole/nginx-error.log;
+
+    # EDIT HERE: give the project root directory (Directory where manage.py is present)
+    set $root /home/brserver1/safestreet/serverPothole/;
+
+    location /static/ {
+        expires 1y;
+        add_header Pragma public;
+        add_header Cache-Control "public";
+        alias   $root/serverPothole/staticfiles/;
+    }
+
+    location /media/static {
+        alias   $root/serverPothole/media/static;
+    }
+    location /media {
+        alias   $root/serverPothole/media;
+        internal;
+    }
+
+    location /{
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_connect_timeout 600;
+        proxy_read_timeout 1200;
+        # EDIT HERE: PORT where your django/gunicorn server is running
+        proxy_pass http://127.0.0.1:5555;
+    }
+}
