@@ -145,3 +145,4 @@ staticfiles/*
 
 static/model/*
 db_dump/
+junk/
