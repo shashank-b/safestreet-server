@@ -3,7 +3,7 @@
 
 server {
     # EDIT HERE: the listening port
-    listen 81;
+    listen 85;
     # Uncomment following line to listen on a particular hostname
     # server_name bodhitree.cse.iitb.ac.in;
     client_max_body_size 4G;
@@ -20,20 +20,20 @@ server {
     error_log /var/log/serverPothole/nginx-error.log;
 
     # EDIT HERE: give the project root directory (Directory where manage.py is present)
-    set $root /home/brserver1/safestreet/serverPothole/;
+    set $root /home/vikrant/serverPothole;
 
     location /static/ {
         expires 1y;
         add_header Pragma public;
         add_header Cache-Control "public";
-        alias   $root/serverPothole/staticfiles/;
+        alias   $root/staticfiles;
     }
 
-    location /media/static {
-        alias   $root/serverPothole/media/static;
-    }
+    # location /media/static {
+    #     alias   $root/media/static;
+    # }
     location /media {
-        alias   $root/serverPothole/media;
+        alias   $root/media;
         internal;
     }
 
