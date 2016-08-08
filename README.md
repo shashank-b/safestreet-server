@@ -1,4 +1,5 @@
 # Pothole Reporting Android app's server implementation in Django
+## Documentation for [ SafeStreet-Server ](http://safestreet-server.readthedocs.io/en/latest/)
 
 ## Installation
 1. Install postgresql (`sudo apt-get install postgresql postgresql-contrib`)
