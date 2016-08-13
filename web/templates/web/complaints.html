@@ -1,7 +1,8 @@
 {% load staticfiles %}
 <html>
   <head>
-
+      <link rel="stylesheet" href="{% static 'web/bootstrap-3.3.7/css/bootstrap.min.css' %}">
+      <link rel="stylesheet" href="{% static 'web/bootstrap-3.3.7/css/bootstrap-theme.min.css' %}">
   <style type="text/css">
 
     {
@@ -34,8 +35,9 @@
     
 </head>
         <body>
-                 
-          <div id="map-canvas"/>
+
+        <div id="map-canvas" style="width:1920px; height:1080px;"/>
+        <script src="{% static 'web/bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
         </body>
 </html>
 

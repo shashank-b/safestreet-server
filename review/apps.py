@@ -3,5 +3,5 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 
 
-class AddreviewConfig(AppConfig):
-    name = 'addReview'
+class ReviewConfig(AppConfig):
+    name = 'review'

@@ -40,12 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',  # for postgis
-    'user',
-    'complaint',
-    'review',
-    'web',
-    'core',
-    'auto_pothole',
+    'user.apps.UserConfig',
+    'complaint.apps.ComplaintConfig',
+    'review.apps.ReviewConfig',
+    'web.apps.WebConfig',
+    'core.apps.CoreConfig',
+    'auto_pothole.apps.AutoPotholeConfig',
     'rest_framework',
 ]
 
@@ -65,7 +65,7 @@ ROOT_URLCONF = 'serverPothole.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(SETTINGS_PATH, 'templates')],
+        'DIRS': [os.path.join(SETTINGS_PATH, 'web/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

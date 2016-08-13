@@ -12,12 +12,12 @@ from user.models import User
 from .serializers import *
 
 
-def getSmoothData(data, winsize):
-    smoothSize = winsize / 2
-    smoothData = []
+def get_smooth_data(data, winsize):
+    smooth_size = winsize / 2
+    smooth_data = []
     d = []
 
-    for i in range(smoothSize):
+    for i in range(smooth_size):
         d.append([0, 9.8, data[0][2], data[0][3], data[0][4], data[0][5]])
 
     data = d + data
@@ -28,74 +28,74 @@ def getSmoothData(data, winsize):
         z = data[i][1]
         window.append([xy, z])
 
-        if (len(window) >= smoothSize):
+        if len(window) >= smooth_size:
             Z = map(lambda p: p[1], window)
             XY = map(lambda p: p[0], window)
-            smoothData.append([sum(XY) / len(XY), sum(Z) / len(Z), data[i][2], data[i][3], data[i][4], data[i][5]])
+            smooth_data.append([sum(XY) / len(XY), sum(Z) / len(Z), data[i][2], data[i][3], data[i][4], data[i][5]])
             window = window[1:]
 
-    starttime = 0
-    for i in range(len(smoothData)):
-        if (smoothData[i][4] != ''):
-            starttime = long(smoothData[i][4]) - 500
+    start_time = 0
+    for i in range(len(smooth_data)):
+        if (smooth_data[i][4] != ''):
+            start_time = long(smooth_data[i][4]) - 500
 
-    finalSmoothdata = []
-    for i in range(len(smoothData)):
-        if (smoothData[i][4] != ''):
-            finalSmoothdata.append(
-                [smoothData[i][0], smoothData[i][1], smoothData[i][2], smoothData[i][3], smoothData[i][4],
-                 smoothData[i][5]])
+    final_smoothdata = []
+    for i in range(len(smooth_data)):
+        if (smooth_data[i][4] != ''):
+            final_smoothdata.append(
+                [smooth_data[i][0], smooth_data[i][1], smooth_data[i][2], smooth_data[i][3], smooth_data[i][4],
+                 smooth_data[i][5]])
         else:
-            finalSmoothdata.append(
-                [smoothData[i][0], smoothData[i][1], smoothData[i][2], smoothData[i][3], str(starttime),
-                 smoothData[i][5]])
+            final_smoothdata.append(
+                [smooth_data[i][0], smooth_data[i][1], smooth_data[i][2], smooth_data[i][3], str(start_time),
+                 smooth_data[i][5]])
 
-    return finalSmoothdata
+    return final_smoothdata
 
 
-def getMaxMin(Z):
+def get_max_min(Z):
     return max(Z) - min(Z)
 
 
-def getVariance(Z):
+def get_variance(Z):
     meanz = sum(Z) / len(Z)
     varz = sum(map(lambda p: (p - meanz) * (p - meanz), Z)) / len(Z)
     return varz
 
 
-def getFeatures(data):
+def get_features(data):
     Z = map(lambda p: p[1], data)
-    return [getMaxMin(Z), getVariance(Z)]
+    return [get_max_min(Z), get_variance(Z)]
 
 
 def cal_features(data, winsize):
-    features = []
-
-    startIndex = 0
+    start_index = 0
     half_sec_index = ""
 
     for i in range(len(data)):
-        if (data[startIndex][4] != data[i][4]):
+        if (data[start_index][4] != data[i][4]):
             half_sec_index = i
             break
 
     finaldata = []
     for i in range(len(data)):
-        if (data[half_sec_index][4] != data[i][4] and data[i][4] != data[startIndex][4]):
-            feature = getFeatures(data[startIndex:i])
-            finaldata.append([feature[0], feature[1], data[startIndex][2], data[startIndex][3], data[i][4], data[i][5]])
+        if data[half_sec_index][4] != data[i][4] and data[i][4] != data[start_index][4]:
+            feature = get_features(data[start_index:i])
+            finaldata.append(
+                [feature[0], feature[1], data[start_index][2], data[start_index][3], data[i][4], data[i][5]])
 
-            startIndex = half_sec_index
+            start_index = half_sec_index
             half_sec_index = i
 
-    feature = getFeatures(data[startIndex:i])
+    feature = get_features(data[start_index:i])
     finaldata.append(
-        [feature[0], feature[1], data[startIndex][2], data[startIndex][3], data[startIndex][4], data[startIndex][5]])
+        [feature[0], feature[1], data[start_index][2], data[start_index][3], data[start_index][4],
+         data[start_index][5]])
 
     return finaldata
 
 
-def getParsedData(line, winsize):
+def get_parsed_data(line, winsize):
     line = line[1:len(line) - 1]
     values = line.split(";")
     data = []
@@ -131,6 +131,7 @@ def getParsedData(line, winsize):
 #############################################################
 class AddPothole(APIView):
     def get(self, request):
+        # last 5000 rows from autopotholes table
         automated_potholes = AutomatedPotholes.objects.all().order_by('-id')[:5000]
         serializer = AutomatedPotholeEntrySerializer(automated_potholes, many=True)
         return Response(serializer.data)
@@ -145,6 +146,7 @@ class AddPothole(APIView):
         """
 
         reporter_id = request.data.get('reporter_id')
+        # need filtering for pothole_event_data
         pothole_event_data = request.data.get('pothole_event_data')
         vehicle_type = request.data.get('vehicle_type')
         win_size = request.data.get('win_size')
@@ -209,15 +211,15 @@ class AddPothole(APIView):
                         speed=speed, distance=distance, app_version=version, pothole_count=0,
                         phone_model=phone_model).save()
         else:
-            parsedData = getParsedData(values[1], int(win_size))
-            smoothData = getSmoothData(parsedData, int(win_size))
-            featuresData = cal_features(smoothData, int(win_size))
+            parsed_data = get_parsed_data(values[1], int(win_size))
+            smooth_data = get_smooth_data(parsed_data, int(win_size))
+            features_data = cal_features(smooth_data, int(win_size))
 
             file_path = os.path.join(settings.STATIC_ROOT, 'model/model.pkl')
             clf = joblib.load(file_path)
             flag = False
 
-            features = map(lambda p: [p[0], p[1]], featuresData)
+            features = map(lambda p: [p[0], p[1]], features_data)
             intensities = []
             probabilities = []
 
@@ -238,33 +240,33 @@ class AddPothole(APIView):
                 if (int(predicted[0]) == 1):
                     flag = True
 
-            indexOfMaxIntensity = 0
-            maxIntensity = -1
+            index_of_max_intensity = 0
+            max_intensity = -1
             for i in range(len(intensities)):
-                if (maxIntensity < intensities[i]):
-                    maxIntensity = intensities[i]
-                    indexOfMaxIntensity = i
+                if (max_intensity < intensities[i]):
+                    max_intensity = intensities[i]
+                    index_of_max_intensity = i
 
-            lat = featuresData[indexOfMaxIntensity][2]
-            lon = featuresData[indexOfMaxIntensity][3]
-            time = featuresData[indexOfMaxIntensity][4]
-            probability = probabilities[indexOfMaxIntensity]
-            speed = sum(map(lambda p: float(p[5]), featuresData)) / len(featuresData)
+            lat = features_data[index_of_max_intensity][2]
+            lon = features_data[index_of_max_intensity][3]
+            time = features_data[index_of_max_intensity][4]
+            probability = probabilities[index_of_max_intensity]
+            speed = sum(map(lambda p: float(p[5]), features_data)) / len(features_data)
 
             if not vehicle_type:
                 vehicle_type = 'D'
 
             dt = datetime.datetime.fromtimestamp((long(time) + offsetTime) / 1000.0)
 
-            if flag == False:
+            if not flag:
                 AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type,
                                   win_size=win_size, classifier_output='0', detection_time=dt, latitude=lat,
-                                  longitude=lon, classifier_intensity=maxIntensity, partial_distance=partial_distance,
+                                  longitude=lon, classifier_intensity=max_intensity, partial_distance=partial_distance,
                                   classifier_probability=probability, event_speed=speed).save()
             else:
                 AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type,
                                   win_size=win_size, classifier_output='1', detection_time=dt, latitude=lat,
-                                  longitude=lon, classifier_intensity=maxIntensity, partial_distance=partial_distance,
+                                  longitude=lon, classifier_intensity=max_intensity, partial_distance=partial_distance,
                                   classifier_probability=probability, event_speed=speed).save()
 
         return Response({"success": True}, status=status.HTTP_201_CREATED)
