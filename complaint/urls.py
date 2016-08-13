@@ -1,6 +1,7 @@
 from django.conf.urls import url, include
-from rest_framework import routers, serializers, viewsets
+
 from .views import ComplaintList, ComplaintDetail
+
 # Serializers define the API representation.
 # class UserSerializer(serializers.HyperlinkedModelSerializer):
 #     class Meta:
@@ -19,7 +20,7 @@ from .views import ComplaintList, ComplaintDetail
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    url(r'^$', ComplaintList.as_view()),
+    url(r'', ComplaintList.as_view()),
     url(r'^(?P<pk>[0-9]+)/$', ComplaintDetail.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

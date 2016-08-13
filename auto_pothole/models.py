@@ -1,4 +1,5 @@
 from django.db import models
+
 from user.models import User
 
 
@@ -19,6 +20,7 @@ class AutomatedPotholes(models.Model):
     def __str__(self):
         return "Id: %d, ReporterId: %d, Data: %c" % (self.id, self.reporter.id, self.classifier_output)
 
+
 class RideDetails(models.Model):
     reporter = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=1, default='D')
@@ -29,5 +31,6 @@ class RideDetails(models.Model):
     app_version = models.TextField()
     pothole_count = models.IntegerField(null=True)
     phone_model = models.TextField(null=True)
+
     def __str__(self):
         return "Id: %d, ReporterId: %d" % (self.id, self.reporter.id)
