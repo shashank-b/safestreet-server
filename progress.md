@@ -1,3 +1,5 @@
+## 13-Aug-2016
+1. map is centered to Mumbai by default 
 ## 08-Aug-2016
 1. uploaded the documentation to readthedocs.org [link](http://safestreet-server.readthedocs.io/en/latest/)
 
