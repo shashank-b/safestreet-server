@@ -42,7 +42,7 @@ class ComplaintList(APIView):
             complaint.save()
             return Response(ComplaintEntrySerializer(complaint).data)
         except Exception as e:
-            print (e.message)
+            print((e.message))
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -32,7 +32,7 @@ class MyUserManager(BaseUserManager):
         """
         Creates and saves a superuser with the given email, name, city, phone and password
         """
-        print("dd", Email, Name, City, Phone, password)
+        print(("dd", Email, Name, City, Phone, password))
         u = self.create_user(Email=Email,
                              Name=Name,
                              City=City,
