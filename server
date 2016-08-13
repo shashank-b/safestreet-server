@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+
+usage_msg="
+Usage: $0 [usage|start|stop|restart|start_main|stop_main]
+
+usage:              Print this message and exit
+start:              Start Gunicorn server
+stop:               Stop both Gunicorn server
+restart:            Restart both servers
+start_main:         Start Gunicorn server only
+stop_main:          Stop gunicorn server only
+
+"
+
+# Checks if terminal supports color and initializes basic colors with tput
+if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    color_prompt=yes
+    RED=`tput setaf 1`    # Red color
+    GREEN=`tput setaf 2`    # Green color
+    BOLD=`tput bold`      # Bold text
+    RESET=`tput sgr0`      # Reset to terminal default
+else
+    color_prompt=
+    RESET=
+fi;
+
+# Set color for output only when STDOUT is tty
+if [ -t 1 ] && [ "$color_prompt" = yes ];
+then
+    outRED=${RED}
+    outGREEN=${GREEN}
+    outBOLD=${BOLD}
+    outRESET=${RESET}
+else
+    outRED=
+    outGREEN=
+    outBOLD=
+    outRESET=
+fi
+
+# Set color for output only when STDERR is tty
+if [ -t 2 ] && [ "$color_prompt" = yes ];
+then
+    errRED=${RED}
+    errGREEN=${GREEN}
+    errBOLD=${BOLD}
+    errRESET=${RESET}
+else
+    errRED=
+    errGREEN=
+    errBOLD=
+    errRESET=
+fi
+
+function echoerr {
+    # Function to write data to STDERR
+    # Takes two arguments:
+    #   First: String to print to stderr
+    #   Second (optional): If yes, then exit from bash
+
+    >&2 echo $1;
+    if [ "$2" = yes ];
+    then
+        exit 1;
+    fi;
+}
+
+# Name of file where configuration is stored
+CONFIG_FILE_NAME='server.cfg'
+
+# Absolute path of directory of this bash script
+BASH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Path of configuration file
+CONFIG_FILE="$BASH_DIR/$CONFIG_FILE_NAME"
+
+# Project root of Django (This must be hard coded wrt $BASH_DIR
+PROJECT_ROOT=${BASH_DIR}
+
+# Logs directory
+LOG_DIR="$PROJECT_ROOT/logs"
+
+# Check if configuration file is present or not
+if [ ! -f "$CONFIG_FILE" ]
+then
+    echoerr "${errRED}Configuration file ${errBOLD}$CONFIG_FILE${errRESET}${errRED} does not exists${errRESET}" "yes";
+else
+    echo "${outGREEN}Reading configuration from ${outBOLD}$CONFIG_FILE${outRESET}";
+    echo "";
+fi
+
+# Loading variables from configuration file
+source "$CONFIG_FILE"
+
+variable_array=('PORT' 'BIND_IP' 'WORKERS' 'WORKER_CLASS')
+
+# Verify if all variables are present in configuration file
+for var_name in "${variable_array[@]}"
+do
+    var=${var_name}
+    if [[ -z "${!var}" ]];
+    then
+        echoerr "${errRED}Variable ${errBOLD}$var_name${errRESET}${errRED} not found${errRESET}";
+        exit 1;
+    fi;
+done;
+
+# Print usage
+function usage {
+    echo "$usage_msg" 1>&2; exit 1;
+}
+
+# Kill gunicorn process (main server)
+function stop_main {
+    fuser -k "$PORT"/tcp;
+}
+
+
+# Kill both main server
+function stop {
+    stop_main;
+}
+
+# Start main server (Gunicorn)
+function start_main {
+    # For gunicorn settings refer: http://docs.gunicorn.org/en/stable/settings.html
+
+    nohup gunicorn serverPothole.wsgi \
+        --chdir ${PROJECT_ROOT} \
+        --bind "$BIND_IP:$PORT" \
+        --workers "$WORKERS" \
+        --worker-class "$WORKER_CLASS" \
+        --access-logfile "$LOG_DIR/gunicorn_access.log" \
+        --access-logformat "%(h)s %({X-Real-IP}i)s %(D)s %(l)s %(u)s %(t)s %(r)s %(s)s %(b)s %(f)s %(a)s" \
+        --error-logfile "$LOG_DIR/gunicorn_error.log" \
+        --log-file "$LOG_DIR/gunicorn_logs.log" \
+        --log-level=info \
+        --timeout=150 \
+        --daemon \
+        > "$LOG_DIR/nohup_gunicorn.log"        # Redirect nohup output to log file
+}
+
+
+# Start both main server
+function start {
+    start_main;
+}
+
+# Restart server
+function restart {
+    stop;
+    start;
+}
+
+# Allowed commands
+function_array=("usage", "start", "stop", "start_main", "stop_main", "restart")
+
+# Validate allowed commands and run command
+if [[ " ${function_array[@]} " =~ "$1" ]]; then
+    "$@"
+else
+    echoerr "${errRED}${errBOLD}$@${errRESET}${errRED} is not a valid command. See usage.${errRESET}";
+    usage;
+    exit 1;
+fi
