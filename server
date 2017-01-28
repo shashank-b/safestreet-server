@@ -135,7 +135,8 @@ function start_main {
         --error-logfile "$LOG_DIR/gunicorn_error.log" \
         --log-file "$LOG_DIR/gunicorn_logs.log" \
         --log-level=info \
-        --timeout=150 \
+        --keep-alive=900 \
+        --timeout=900 \
         --daemon \
         > "$LOG_DIR/nohup_gunicorn.log"        # Redirect nohup output to log file
 }
