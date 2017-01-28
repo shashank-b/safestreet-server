@@ -27,6 +27,7 @@ class RideDetails(models.Model):
     start_time = models.DateTimeField(null=True)
     stop_time = models.DateTimeField(null=True)
     speed = models.FloatField(null=True)
+    # distance in Kilometers
     distance = models.FloatField(null=True)
     app_version = models.TextField()
     pothole_count = models.IntegerField(null=True)

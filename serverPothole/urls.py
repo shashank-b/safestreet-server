@@ -19,12 +19,18 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^api/complaint/', include('complaint.urls', namespace='complaint')),
-    url(r'^api/user/', include('user.urls', namespace='user')),
+    url(r'^api/user/', include('user.api.urls', namespace='user')),
     url(r'^api/review/', include('review.urls', namespace='review')),
     url(r'^admin/', include(admin.site.urls), name='admin'),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'),
+    url(r'^api-auth/',
+        include('rest_framework.urls', namespace='rest_framework'),
         name='api-auth'),
+    url(r'^api/', include('ride.api.urls'), name='ride-api'),
     url(r'^', include('web.urls', namespace='web')),
     url(r'^web/', include('web.urls', namespace='web')),
-    url(r'^auto_pothole/', include('auto_pothole.urls', namespace='auto_pothole'))
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^auto_pothole/',
+        include('auto_pothole.urls', namespace='auto_pothole'))
+]
+
+urlpatterns = urlpatterns + static(settings.MEDIA_URL,
+                                   document_root=settings.MEDIA_ROOT)

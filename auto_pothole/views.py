@@ -31,7 +31,9 @@ def get_smooth_data(data, winsize):
         if len(window) >= smooth_size:
             Z = [p[1] for p in window]
             XY = [p[0] for p in window]
-            smooth_data.append([sum(XY) / len(XY), sum(Z) / len(Z), data[i][2], data[i][3], data[i][4], data[i][5]])
+            smooth_data.append(
+                [sum(XY) / len(XY), sum(Z) / len(Z), data[i][2], data[i][3],
+                 data[i][4], data[i][5]])
             window = window[1:]
 
     start_time = 0
@@ -43,11 +45,13 @@ def get_smooth_data(data, winsize):
     for i in range(len(smooth_data)):
         if (smooth_data[i][4] != ''):
             final_smoothdata.append(
-                [smooth_data[i][0], smooth_data[i][1], smooth_data[i][2], smooth_data[i][3], smooth_data[i][4],
+                [smooth_data[i][0], smooth_data[i][1], smooth_data[i][2],
+                 smooth_data[i][3], smooth_data[i][4],
                  smooth_data[i][5]])
         else:
             final_smoothdata.append(
-                [smooth_data[i][0], smooth_data[i][1], smooth_data[i][2], smooth_data[i][3], str(start_time),
+                [smooth_data[i][0], smooth_data[i][1], smooth_data[i][2],
+                 smooth_data[i][3], str(start_time),
                  smooth_data[i][5]])
 
     return final_smoothdata
@@ -79,17 +83,20 @@ def cal_features(data, winsize):
 
     finaldata = []
     for i in range(len(data)):
-        if data[half_sec_index][4] != data[i][4] and data[i][4] != data[start_index][4]:
+        if data[half_sec_index][4] != data[i][4] and data[i][4] != \
+                data[start_index][4]:
             feature = get_features(data[start_index:i])
             finaldata.append(
-                [feature[0], feature[1], data[start_index][2], data[start_index][3], data[i][4], data[i][5]])
+                [feature[0], feature[1], data[start_index][2],
+                 data[start_index][3], data[i][4], data[i][5]])
 
             start_index = half_sec_index
             half_sec_index = i
 
     feature = get_features(data[start_index:i])
     finaldata.append(
-        [feature[0], feature[1], data[start_index][2], data[start_index][3], data[start_index][4],
+        [feature[0], feature[1], data[start_index][2], data[start_index][3],
+         data[start_index][4],
          data[start_index][5]])
 
     return finaldata
@@ -105,26 +112,25 @@ def get_parsed_data(line, winsize):
     speed = ""
 
     for i in range(len(values)):
-        if (values[i][1:2].isalpha()):
+        if values[i][1:2].isalpha():
             key_val = values[i].split(":")
             key = key_val[0]
             val = key_val[1]
 
-            if (key == "Lat"):
+            if key == "Lat":
                 lat = val
 
-            if (key == "Lon"):
+            if key == "Lon":
                 lon = val
 
-            if (key == "Speed" or key == " Speed"):
+            if key == "Speed" or key == " Speed":
                 speed = val
 
-            if (key == "TIME"):
+            if key == "TIME":
                 time = val
         else:
             val = values[i].split(",")
             data.append([float(val[0]), float(val[1]), lat, lon, time, speed])
-
     return data
 
 
@@ -132,8 +138,10 @@ def get_parsed_data(line, winsize):
 class AddPothole(APIView):
     def get(self, request):
         # last 5000 rows from autopotholes table
-        automated_potholes = AutomatedPotholes.objects.all().order_by('-id')[:5000]
-        serializer = AutomatedPotholeEntrySerializer(automated_potholes, many=True)
+        automated_potholes = AutomatedPotholes.objects.all().order_by('-id')[
+                             :5000]
+        serializer = AutomatedPotholeEntrySerializer(automated_potholes,
+                                                     many=True)
         return Response(serializer.data)
 
     """
@@ -161,18 +169,20 @@ class AddPothole(APIView):
 
         if not reporter_id or not pothole_event_data:
             print('Invalid post data')
-            return Response({"success": False, "error": "Invalid POST data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False, "error": "Invalid POST data"},
+                            status=status.HTTP_400_BAD_REQUEST)
         try:
             reporter = User.objects.get(pk=reporter_id)
         except (User.DoesNotExist, User.MultipleObjectsReturned):
             print('invalid reporter_id')
-            return Response({"success": False, "error": "Invalid Reporter ID"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False, "error": "Invalid Reporter ID"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         values = pothole_event_data.split('Details:-')
 
         print("Reporter = ", reporter)
 
-        if (values[0] == 'Ride'):
+        if values[0] == 'Ride':
             line = values[1]
             values = line[1:len(line) - 1]
             keys_values = values.split(';')
@@ -188,27 +198,31 @@ class AddPothole(APIView):
                 key_value = keys_values[i].split(":")
                 key = key_value[0]
                 value = key_value[1]
-                if (key == "StartTime"):
-                    start_time = datetime.datetime.fromtimestamp((int(value) + offsetTime) / 1000.0)
+                if key == "StartTime":
+                    start_time = datetime.datetime.fromtimestamp(
+                        (int(value) + offsetTime) / 1000.0)
 
-                if (key == "StopTime"):
-                    stop_time = datetime.datetime.fromtimestamp((int(value) + offsetTime) / 1000.0)
+                if key == "StopTime":
+                    stop_time = datetime.datetime.fromtimestamp(
+                        (int(value) + offsetTime) / 1000.0)
 
-                if (key == "Distance"):
+                if key == "Distance":
                     distance = float(value)
 
-                if (key == "AvgRideSpeed"):
+                if key == "AvgRideSpeed":
                     speed = float(value)
 
-                if (key == "Version"):
+                if key == "Version":
                     version = value
 
-                if (key == "PhoneModel"):
+                if key == "PhoneModel":
                     phone_model = value
 
             print('inserting RideDetails')
-            RideDetails(reporter=reporter, vehicle_type=vehicle_type, start_time=start_time, stop_time=stop_time,
-                        speed=speed, distance=distance, app_version=version, pothole_count=0,
+            RideDetails(reporter=reporter, vehicle_type=vehicle_type,
+                        start_time=start_time, stop_time=stop_time,
+                        speed=speed, distance=distance, app_version=version,
+                        pothole_count=0,
                         phone_model=phone_model).save()
         else:
             parsed_data = get_parsed_data(values[1], int(win_size))
@@ -237,13 +251,13 @@ class AddPothole(APIView):
                 dist = dist.tolist()
                 intensities.append(float(dist[0]))
 
-                if (int(predicted[0]) == 1):
+                if int(predicted[0]) == 1:
                     flag = True
 
             index_of_max_intensity = 0
             max_intensity = -1
             for i in range(len(intensities)):
-                if (max_intensity < intensities[i]):
+                if max_intensity < intensities[i]:
                     max_intensity = intensities[i]
                     index_of_max_intensity = i
 
@@ -251,23 +265,37 @@ class AddPothole(APIView):
             lon = features_data[index_of_max_intensity][3]
             time = features_data[index_of_max_intensity][4]
             probability = probabilities[index_of_max_intensity]
-            speed = sum([float(p[5]) for p in features_data]) / len(features_data)
+            speed = sum([float(p[5]) for p in features_data]) / len(
+                features_data)
 
             if not vehicle_type:
                 vehicle_type = 'D'
 
-            dt = datetime.datetime.fromtimestamp((int(time) + offsetTime) / 1000.0)
+            dt = datetime.datetime.fromtimestamp(
+                (int(time) + offsetTime) / 1000.0)
 
             if not flag:
-                AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type,
-                                  win_size=win_size, classifier_output='0', detection_time=dt, latitude=lat,
-                                  longitude=lon, classifier_intensity=max_intensity, partial_distance=partial_distance,
-                                  classifier_probability=probability, event_speed=speed).save()
+                AutomatedPotholes(reporter=reporter,
+                                  event_data=pothole_event_data,
+                                  vehicle_type=vehicle_type,
+                                  win_size=win_size, classifier_output='0',
+                                  detection_time=dt, latitude=lat,
+                                  longitude=lon,
+                                  classifier_intensity=max_intensity,
+                                  partial_distance=partial_distance,
+                                  classifier_probability=probability,
+                                  event_speed=speed).save()
             else:
-                AutomatedPotholes(reporter=reporter, event_data=pothole_event_data, vehicle_type=vehicle_type,
-                                  win_size=win_size, classifier_output='1', detection_time=dt, latitude=lat,
-                                  longitude=lon, classifier_intensity=max_intensity, partial_distance=partial_distance,
-                                  classifier_probability=probability, event_speed=speed).save()
+                AutomatedPotholes(reporter=reporter,
+                                  event_data=pothole_event_data,
+                                  vehicle_type=vehicle_type,
+                                  win_size=win_size, classifier_output='1',
+                                  detection_time=dt, latitude=lat,
+                                  longitude=lon,
+                                  classifier_intensity=max_intensity,
+                                  partial_distance=partial_distance,
+                                  classifier_probability=probability,
+                                  event_speed=speed).save()
 
         return Response({"success": True}, status=status.HTTP_201_CREATED)
 
@@ -287,14 +315,18 @@ class AllRideDetail(APIView):
 
         for i in range(len(data)):
             total_distance = total_distance + data[i]["distance"]
-            d1 = datetime.datetime.strptime(data[i]["start_time"][0:19], '%Y-%m-%dT%H:%M:%S')
-            d2 = datetime.datetime.strptime(data[i]["stop_time"][0:19], '%Y-%m-%dT%H:%M:%S')
+            d1 = datetime.datetime.strptime(data[i]["start_time"][0:19],
+                                            '%Y-%m-%dT%H:%M:%S')
+            d2 = datetime.datetime.strptime(data[i]["stop_time"][0:19],
+                                            '%Y-%m-%dT%H:%M:%S')
             total_time += (d2 - d1).total_seconds()
             pothole_count = pothole_count + data[i]["pothole_count"]
 
         total_time *= 1000
-        return Response({"id": pk, "total_time": int(total_time), "total_distance": total_distance,
-                         "pothole_count": pothole_count}, status=status.HTTP_200_OK)
+        return Response({"id": pk, "total_time": int(
+            total_time), "total_distance": total_distance,
+                         "pothole_count": pothole_count},
+                        status=status.HTTP_200_OK)
 
 
 class DummyPost(APIView):

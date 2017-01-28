@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from .views import UserList, UserDetail, UserGetComplaintForReview, UserFromEmail
+from user.api.views import UserList, UserDetail, UserGetComplaintForReview, UserFromEmail
 
 urlpatterns = [
     url(r'^$', UserList.as_view(), name='user_list'),

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'web.apps.WebConfig',
     'core.apps.CoreConfig',
     'auto_pothole.apps.AutoPotholeConfig',
+    'ride.apps.RideConfig',
     'rest_framework',
 ]
 
