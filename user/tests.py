@@ -5,8 +5,8 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from user.api.serializers import UserEntrySerializer
 from .models import User
-from .serializers import UserEntrySerializer
 
 
 class UserTest(APITestCase):
