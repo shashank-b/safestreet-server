@@ -16,3 +16,4 @@ class Ride(models.Model):
     # file = models.FileField(upload_to='uploads')
     gps_log = models.FileField(upload_to='uploads')
     acc_log = models.FileField(upload_to='uploads')
+    is_processed = models.BooleanField(default=False)

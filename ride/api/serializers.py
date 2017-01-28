@@ -8,7 +8,7 @@ class RideSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ride
-        fields = ('id', 'gps_log','acc_log', 'rider')
+        fields = ('id', 'gps_log', 'acc_log', 'rider')
 
 
 class UserSerializer(serializers.ModelSerializer):

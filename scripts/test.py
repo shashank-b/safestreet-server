@@ -1,11 +1,15 @@
+import zipfile
+
 from ride.models import Ride
 
 
 def run():
-    print("hello")
     trips = Ride.objects.all()
     for trip in trips:
-        user = trip.rider
         gps_file = trip.gps_log
-        acc_file = trip.acc_log
-        print(user, gps_file, acc_file)
+        zip_file = zipfile.ZipFile(gps_file)
+        file_names = zip_file.namelist()
+        for file_name in file_names:
+            with zip_file.open(file_name) as f:
+                for line in f:
+                    print(line)
