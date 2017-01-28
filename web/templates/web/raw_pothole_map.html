@@ -35,7 +35,7 @@
       {% endcomment %}
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZ_hgqAqW-IbDITHKykRm2uq7boVU1dlE"></script>
-    <script type="text/javascript" src="/media/data/data.js"></script>
+    <script type="text/javascript" src="/media/data/data1.js"></script>
     <script type="text/javascript" src="{% static "web/js/markerclusterer/src/markerclusterer.js" %}"></script>
 
     <script type="text/javascript">
@@ -47,17 +47,25 @@
                 center: center,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
+            var infoWin = new google.maps.InfoWindow();
 
-            var markers = [];
-            for (var i = 0; i < 100; i++) {
-                var gpsPoint = data[i];
-                var latLng = new google.maps.LatLng(gpsPoint.latitude,
-                    gpsPoint.longitude);
+            var markers = data.map(function (location, i) {
+                var latLng = new google.maps.LatLng(location.lat,
+                    location.lon);
+
                 var marker = new google.maps.Marker({
                     position: latLng
                 });
-                markers.push(marker);
-            }
+
+                google.maps.event.addListener(marker, 'click', function (evt) {
+                    var content = "speed = "+location.speed.toFixed(2)+" kmph<br>"+
+                            "accuracy = " + location.acc + " m<br>" +
+                            "bearing = " + location.bearing ;
+                    infoWin.setContent(content);
+                    infoWin.open(map, marker);
+                })
+                return marker;
+            });
             var options = {
                 imagePath: '{% static "web/js/markerclusterer/images/m" %}'
             };
