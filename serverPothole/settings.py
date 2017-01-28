@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'auto_pothole.apps.AutoPotholeConfig',
     'ride.apps.RideConfig',
     'rest_framework',
+    'django_extensions',
 ]
 
 MIDDLEWARE_CLASSES = [
