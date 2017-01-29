@@ -12,6 +12,7 @@ django-filter==0.12.0
 djangorestframework==3.3.2
 docutils==0.12
 eventlet==0.19.0
+geopy==1.11.0
 gevent==1.1.2
 greenlet==0.4.10
 gunicorn==19.6.0
@@ -25,6 +26,7 @@ Markdown==2.6.5
 MarkupSafe==0.23
 matplotlib==1.5.1
 numpy==1.11.0
+pandas==0.19.2
 pathtools==0.1.2
 pexpect==4.2.0
 pickleshare==0.7.3
@@ -40,6 +42,7 @@ pytz==2016.4
 PyYAML==3.11
 scikit-learn==0.17.1
 scipy==0.17.1
+Shapely==1.5.17.post1
 simplegeneric==0.8.1
 singledispatch==3.4.0.3
 six==1.10.0
