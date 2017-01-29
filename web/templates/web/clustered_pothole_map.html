@@ -35,7 +35,7 @@
       {% endcomment %}
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZ_hgqAqW-IbDITHKykRm2uq7boVU1dlE"></script>
-    <script type="text/javascript" src="/media/data/data1.js"></script>
+    <script type="text/javascript" src="/media/data/dbscan_data.js"></script>
     <script type="text/javascript" src="{% static "web/js/markerclusterer/src/markerclusterer.js" %}"></script>
 
     <script type="text/javascript">
@@ -57,13 +57,13 @@
                     position: latLng
                 });
 
-                google.maps.event.addListener(marker, 'click', function (evt) {
-                    var content = "speed = " + location.speed.toFixed(2) + " kmph<br>" +
-                        "accuracy = " + location.acc + " m<br>" +
-                        "bearing = " + location.bearing;
-                    infoWin.setContent(content);
-                    infoWin.open(map, marker);
-                })
+{#                google.maps.event.addListener(marker, 'click', function (evt) {#}
+{#                    var content = "speed = " + location.speed.toFixed(2) + " kmph<br>" +#}
+{#                        "accuracy = " + location.acc + " m<br>" +#}
+{#                        "bearing = " + location.bearing;#}
+{#                    infoWin.setContent(content);#}
+{#                    infoWin.open(map, marker);#}
+{#                })#}
                 return marker;
             });
             var options = {
@@ -83,7 +83,7 @@
 <script type="text/javascript" src="{% static "web/js/jquery-3.1.0.js" %}"></script>
 <script type="text/javascript">
     $(document).ready(function () {
-        $("h2").text("Total unclustered pothole count " + data.length)
+        $("h2").text("Pothole counter after clustering(DBScan) " + data.length)
     });
 </script>
 </body>

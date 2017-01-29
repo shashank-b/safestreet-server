@@ -22,3 +22,6 @@ class AllComplaints(APIView):
 class RawPotholeMap(TemplateView):
     template_name = 'web/raw_pothole_map.html'
 
+
+class ClusteredPotholeMap(TemplateView):
+    template_name = 'web/clustered_pothole_map.html'
