@@ -50,8 +50,9 @@
             var infoWin = new google.maps.InfoWindow();
 
             var markers = data.map(function (location, i) {
-                var latLng = new google.maps.LatLng(location.lat,
-                    location.lon);
+                // location [lat,lon,accuracy,speed,bearing]
+                var latLng = new google.maps.LatLng(location[0],
+                    location[1]);
 
                 var marker = new google.maps.Marker({
                     position: latLng

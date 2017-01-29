@@ -12,6 +12,8 @@ CSV_FILE_NAME = "db_scan_data.csv"
 # 25 meters
 MIN_CLUSTER_DISTANCE = .025
 
+CLUSTERED_DATA_FILE_FULL_PATH = "media/data/dbscan_data.js"
+
 
 def get_centermost_point(cluster):
     centroid = (MultiPoint(cluster).centroid.x, MultiPoint(cluster).centroid.y)
@@ -31,11 +33,11 @@ def run():
     clusters = pd.Series([coords[cluster_labels == n] for n in range(num_clusters)])
     print('Number of clusters: {}'.format(num_clusters))
     centermost_points = clusters.map(get_centermost_point)
-    with open("media/data/dbscan_data.js", "w") as fw:
-        print("var data = [\n", file=fw)
+    with open(CLUSTERED_DATA_FILE_FULL_PATH, "w") as fw:
+        print("var data = [\n", file=fw,end="")
         for points in centermost_points:
-            print("{{ \"lat\":{0},\"lon\":{1} }},".format(points[0], points[1]), file=fw)
-        print("]", file=fw)
+            print("[{0},{1}],".format(points[0], points[1]), file=fw,end="")
+        print("]", file=fw,end="")
 
         # lats, lons = zip(*centermost_points)
         # rep_points = pd.DataFrame({'lon': lons, 'lat': lats})
