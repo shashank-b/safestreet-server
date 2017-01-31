@@ -147,8 +147,7 @@ def get_parsed_data(line, winsize):
 class AddPothole(APIView):
     def get(self, request):
         # last 5000 rows from autopotholes table
-        automated_potholes = AutomatedPotholes.objects.all().order_by('-id')[
-                             :5000]
+        automated_potholes = AutomatedPotholes.objects.all()
         serializer = AutomatedPotholeEntrySerializer(automated_potholes,
                                                      many=True)
         return Response(serializer.data)
