@@ -1,53 +1,23 @@
+{% extends 'web/base.html' %}
 {% load staticfiles %}
-<!DOCTYPE>
-<html>
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Mumbai Pothole Map</title>
 
-    <style type="text/css">
-        body {
-            margin: 0;
-            padding: 10px 20px 20px;
-            font-family: Arial;
-            font-size: 16px;
-        }
-
-        #map-container {
-            padding: 6px;
-            border-width: 1px;
-            border-style: solid;
-            border-color: #ccc #ccc #999 #ccc;
-            -webkit-box-shadow: rgba(64, 64, 64, 0.5) 0 2px 5px;
-            -moz-box-shadow: rgba(64, 64, 64, 0.5) 0 2px 5px;
-            box-shadow: rgba(64, 64, 64, 0.1) 0 2px 5px;
-        {#        width: 600px;#}
-        }
-
-        #map {
-        {#        width: 600px;#} height: 800px;
-        }
-
-    </style>
-
-    {% comment %}
-      key=AIzaSyDZ_hgqAqW-IbDITHKykRm2uq7boVU1dlE
-      {% endcomment %}
-    <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZ_hgqAqW-IbDITHKykRm2uq7boVU1dlE"></script>
+{% block data %}
     <script type="text/javascript" src="/media/data/dbscan_data.js"></script>
-    <script type="text/javascript" src="{% static "web/js/markerclusterer/src/markerclusterer.js" %}"></script>
+{% endblock %}
 
+{% block draw_map %}
     <script type="text/javascript">
+    var map;
+    var infoWin;
         function initialize() {
             var center = new google.maps.LatLng(19.0760, 72.8777);
 
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
                 center: center,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
-            var infoWin = new google.maps.InfoWindow();
+            infoWin = new google.maps.InfoWindow();
 
             var markers = data.map(function (location, i) {
                 // location [lat,lon,accuracy,speed,bearing]
@@ -57,14 +27,6 @@
                 var marker = new google.maps.Marker({
                     position: latLng
                 });
-
-{#                google.maps.event.addListener(marker, 'click', function (evt) {#}
-{#                    var content = "speed = " + location.speed.toFixed(2) + " kmph<br>" +#}
-{#                        "accuracy = " + location.acc + " m<br>" +#}
-{#                        "bearing = " + location.bearing;#}
-{#                    infoWin.setContent(content);#}
-{#                    infoWin.open(map, marker);#}
-{#                })#}
                 return marker;
             });
             var options = {
@@ -74,18 +36,12 @@
         }
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
-</head>
-<body>
-<h3>Mumbai Pothole map</h3>
-<h2></h2>
-<div id="map-container">
-    <div id="map"></div>
-</div>
-<script type="text/javascript" src="{% static "web/js/jquery-3.1.0.js" %}"></script>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $("h2").text("Pothole counter after clustering(DBScan) " + data.length)
-    });
-</script>
-</body>
-</html>
+{% endblock %}
+
+{% block heading %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("h2").text("Pothole counter after clustering(DBScan) " + data.length)
+        });
+    </script>
+{% endblock %}
