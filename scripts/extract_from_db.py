@@ -1,16 +1,24 @@
 import zipfile
+from pathlib import Path
 
 from ride.models import Ride
 
-DATA_FILE_FULL_PATH = "media/data/data1.js"
+DATA_FILE_FULL_PATH = "media/data/data.csv"
 
 
 def run():
-    trips = Ride.objects.all()
-    with open(DATA_FILE_FULL_PATH, "w") as fw:
-        print("var data = [ ", file=fw, end="")
+    trips = Ride.objects.filter(is_processed=False)
+    data_file = Path(DATA_FILE_FULL_PATH)
+
+    if not data_file.is_file():
+        with data_file.open("a") as fw:
+            print("lat,lon,accuracy,speed,bearing,reporter_id,trip_id", file=fw)
+    with open(DATA_FILE_FULL_PATH, "a") as fw:
+        trip_id = 0
         for trip in trips:
             gps_file = trip.gps_log
+            trip_id += 1
+            reporter_id = trip.rider.id
             try:
                 zip_file = zipfile.ZipFile(gps_file)
                 file_names = zip_file.namelist()
@@ -25,7 +33,7 @@ def run():
                     first = True
                     for line in f:
                         line = line.decode("utf-8").strip()
-                        if first:
+                        if first:  # skip the first header row
                             header = line.split(",")
                             if len(header) < 7:
                                 break
@@ -37,13 +45,16 @@ def run():
                             lat = parts[1]
                             lon = parts[2]
                             acc = parts[3]
+                            # speed in kmph
                             speed = float(parts[4]) * 3.6
                             bearing = parts[5]
-                            print("[{0},{1},{2},{3},{4}],".format(
-                                lat, lon, acc, speed, bearing), file=fw, end=""
+                            print("{0:.6f},{1:.6f},{2},{3:.2f},{4},{5},{6}".format(
+                                float(lat), float(lon), acc, speed, bearing, reporter_id, trip_id), file=fw,
                             )
 
                     f.close()
             zip_file.close()
             gps_file.close()
-        print("]", file=fw, end="")
+
+            trip.is_processed = True
+            trip.save()
