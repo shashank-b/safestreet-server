@@ -70,7 +70,9 @@
                     google.maps.event.addListener(marker, 'click', function (evt) {
                         var content = "speed = " + location[3].toFixed(2) + " kmph<br>" +
                             "accuracy = " + location[2] + " m<br>" +
-                            "bearing = " + location[4];
+                            "bearing = " + location[4] +"<br>" +
+                            "reporter_id = " + location[5]+"<br>" +
+                            "trip_id = " + location[6];
                         infoWin.setContent(content);
                         infoWin.open(map, marker);
                     })
