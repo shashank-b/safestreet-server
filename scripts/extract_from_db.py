@@ -8,16 +8,16 @@ DATA_FILE_FULL_PATH = "media/data/data.csv"
 
 def run():
     trips = Ride.objects.filter(is_processed=False)
+    # trips = Ride.objects.all()
     data_file = Path(DATA_FILE_FULL_PATH)
 
     if not data_file.is_file():
         with data_file.open("a") as fw:
             print("lat,lon,accuracy,speed,bearing,reporter_id,trip_id", file=fw)
     with open(DATA_FILE_FULL_PATH, "a") as fw:
-        trip_id = 0
         for trip in trips:
             gps_file = trip.gps_log
-            trip_id += 1
+            trip_id = trip.id
             reporter_id = trip.rider.id
             try:
                 zip_file = zipfile.ZipFile(gps_file)
