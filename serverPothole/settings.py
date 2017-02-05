@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'ride.apps.RideConfig',
     'rest_framework',
     'django_extensions',
+    'mathfilters',
 ]
 
 MIDDLEWARE_CLASSES = [

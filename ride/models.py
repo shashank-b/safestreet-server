@@ -10,6 +10,9 @@ from django.db import models
 class User(models.Model):
     email = models.EmailField()
 
+    def __unicode__(self):
+        return "{0}".format(self.email)
+
 
 class Ride(models.Model):
     rider = models.ForeignKey(User, related_name='rider', blank=True, null=True)
@@ -17,3 +20,12 @@ class Ride(models.Model):
     gps_log = models.FileField(upload_to='uploads')
     acc_log = models.FileField(upload_to='uploads')
     is_processed = models.BooleanField(default=False)
+
+
+class Distance(models.Model):
+    user = models.ForeignKey(User)
+    distance = models.FloatField(default=0)
+    date = models.DateField()
+
+    def __unicode__(self):
+        return "email: {0} date: {1} distance: {2}".format(self.user.email, self.date, self.distance)

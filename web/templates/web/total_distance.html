@@ -1,0 +1,59 @@
+{% load staticfiles %}
+{% load mathfilters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <title>Maharashtra Pothole Map</title>
+    <link rel="stylesheet" href="{% static "web/bootstrap-3.3.7/css/bootstrap.css" %}">
+    <link rel="stylesheet" href="{% static "web/DataTables-1.10.13/media/css/dataTables.bootstrap.css" %}">
+</head>
+<body>
+<div class="row">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+
+
+    {% block table %}
+        <table id="distance_table" class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>User id</th>
+                <th>Email id</th>
+                <th>Distance (in Km)</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <th></th>
+                <th></th>
+                <th>Total distance {{ total_distance|div:"1000"|floatformat:2 }} Kms</th>
+            </tr>
+            </tfoot>
+            <tbody>
+            {% for dist in distance_details %}
+                <tr>
+                    <td><a href="{{ dist.user__id }}/">{{ dist.user__id }}</a></td>
+                    <td>{{ dist.user__email }}</td>
+                    <td>{{ dist.total_dist|div:"1000"|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+
+        </table>
+    {% endblock %}
+
+    </div>
+    <div class="col-lg-4"></div>
+<div><span class="text-info">Distances will be updated after every 30 minutes</span></div>
+</div>
+<script src="{% static "web/js/jquery-3.1.0.js" %}"></script>
+<script src="{% static "web/DataTables-1.10.13/media/js/jquery.dataTables.js" %}"></script>
+<script src="{% static "web/DataTables-1.10.13/media/js/dataTables.bootstrap.js" %}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#distance_table').DataTable({});
+    });
+</script>
+</body>
+</html>
