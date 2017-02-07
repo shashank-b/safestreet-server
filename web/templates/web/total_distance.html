@@ -52,7 +52,9 @@
 <script src="{% static "web/DataTables-1.10.13/media/js/dataTables.bootstrap.js" %}"></script>
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#distance_table').DataTable({});
+        $('#distance_table').DataTable({
+             "pageLength": 50
+        });
     });
 </script>
 </body>
