@@ -42,8 +42,7 @@ class DistanceView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DistanceView, self).get_context_data(**kwargs)
-        distances = Distance.objects.values('user__id', 'user__email').annotate(total_dist=Sum('distance')).order_by(
-            'user')
+        distances = Distance.objects.values('user__id', 'user__email').annotate(total_dist=Sum('distance')).order_by('-total_dist')
         context['distance_details'] = distances
 
         context['total_distance'] = total_distance(distances)
@@ -58,8 +57,7 @@ class DetailDistanceView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DetailDistanceView, self).get_context_data(**kwargs)
         id = self.kwargs['id']
-        distances = Distance.objects.filter(user__id=id).values('date').annotate(total_dist=Sum('distance')).order_by(
-            'date')
+        distances = Distance.objects.filter(user__id=id).values('date').annotate(total_dist=Sum('distance')).order_by('-date')
         context['distance_details'] = distances
 
         context['total_distance'] = total_distance(distances)
