@@ -4,7 +4,7 @@ All web related links have to be served from here
 """
 from django.conf.urls import url
 
-from .views import AllComplaints, RawPotholeMap, ClusteredPotholeMap, DistanceView, DetailDistanceView
+from .views import AllComplaints, RawPotholeMap, ClusteredPotholeMap, DistanceView, DetailDistanceView, PrivacyPolicyView
 
 urlpatterns = [
     url(r'^$', AllComplaints.as_view(), name='all_complaints'),
@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^allComplaints$', AllComplaints.as_view(), name='all_complaints'),
     url(r'^distances/$', DistanceView.as_view(), name='distance_total'),
     url(r'^distances/(?P<id>\d+)/$', DetailDistanceView.as_view(), name='distance_details'),
+    url(r'^privacypolicy/$', PrivacyPolicyView.as_view(), name='privacy_policy'),
 ]
