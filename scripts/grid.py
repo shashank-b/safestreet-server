@@ -4,7 +4,6 @@ from math import floor, ceil
 import numpy as np
 from sklearn.cluster import KMeans
 
-from scripts.merge_close import MERGE_CLOSE_FILE_PATH
 
 MIN_LAT = 500
 MAX_LAT = -500
@@ -13,6 +12,7 @@ MAX_LON = -500
 INCR_LAT = 0.001
 INCR_LON = INCR_LAT
 
+MERGE_CLOSE_FILE_PATH = "../media/data/merge_data.csv"
 with open(MERGE_CLOSE_FILE_PATH) as fr:
     header_len = -1
     for line in fr:

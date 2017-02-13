@@ -32,3 +32,4 @@ def merge():
                 prev_line = line
                 prev_lat_lon = current_lat_lon
         fw.close()
+merge()
