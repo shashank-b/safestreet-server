@@ -30,8 +30,12 @@ class PrivacyPolicyView(TemplateView):
     template_name = 'web/privacypolicy.html'
 
 
-class ClusteredPotholeMap(TemplateView):
+class DBScanMap(TemplateView):
     template_name = 'web/clustered_pothole_map.html'
+
+
+class KmeansMap(TemplateView):
+    template_name = 'web/kmeans_pothole_map.html'
 
 
 def total_distance(distances):
