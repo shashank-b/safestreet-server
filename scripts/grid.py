@@ -4,7 +4,6 @@ from math import floor, ceil
 import numpy as np
 from sklearn.cluster import KMeans
 
-
 MIN_LAT = 500
 MAX_LAT = -500
 MIN_LON = 500
@@ -131,17 +130,20 @@ def separate_direction(grid):
         partition_index += 1
     # print(partition_index)
     # smaller bearing
-    # grid_in_one_direction = [180,179,0]
-    grid_in_one_direction = grid[partition_index + 1:]
+    # grid1 = [180,179,0]
+    grid1 = grid[partition_index + 1:]
 
     # larger bearing
-    # grid_in_another_direction = [359,355,340]
-    grid_in_another_direction = grid[:partition_index + 1]
+    # grid2 = [359,355,340]
+    grid2 = grid[:partition_index + 1]
 
-    if len(grid_in_another_direction) > 0 and grid_in_another_direction[0][BEARING_INDEX] > 350:
-        while len(grid_in_one_direction) > 0 and grid_in_one_direction[-1][BEARING_INDEX] < 10:
-            grid_in_another_direction.append(grid_in_one_direction.pop())
-    return grid_in_one_direction, grid_in_another_direction
+    # moving 0-10 degree bearing to grid2 with bearing = bearing + 360
+    if len(grid2) > 0 and grid2[0][BEARING_INDEX] > 350:
+        while len(grid1) > 0 and grid1[-1][BEARING_INDEX] < 10:
+            loc = grid1.pop()
+            new_loc = (loc[0], loc[1], loc[2], loc[3] + 360, loc[4])
+            grid2.append(new_loc)
+    return grid1, grid2
     # print("k = {0}".format(k))
     # for item in grid:
     # b = item[BEARING_INDEX]
@@ -154,7 +156,7 @@ def get_avg_bearing(cluster_id, labels_, pothole_points):
     for i in range(len(labels_)):
         if labels_[i] == cluster_id:
             bearings.append(pothole_points[i][BEARING_INDEX])
-    return np.mean(bearings)
+    return np.mean(bearings) % 360
 
 
 def get_clusters_with_bearing(kmeans, pothole_points):
@@ -171,7 +173,10 @@ def get_clusters_with_bearing(kmeans, pothole_points):
 
 KMEANS_CSV_FILE_PATH = "../media/data/kmeans_cluster.csv"
 fw = open(KMEANS_CSV_FILE_PATH, "w")
-print("lat,lon,bearing", file=fw)
+print("lat,lon,bearing,grid_id,direction", file=fw)
+grid_id = 0
+direction = 0
+# direction = 0 and direction = 1 have bearing difference of 150
 for grid_key in GRIDS:
     grid = GRIDS[grid_key]
     g1, g2 = separate_direction(grid)
@@ -182,21 +187,26 @@ for grid_key in GRIDS:
     #         print(g1)
     #         print(g2)
     if len(g1) > 0:
+        direction = 0
         kmeans = get_cluster(g1, min(k, len(g1)))
         clustered_points = get_clusters_with_bearing(kmeans, g1)
         for cluster in clustered_points:
-            print("{0:.6f},{1:.6f},{2:.2f}".format(cluster[0], cluster[1], cluster[2]), file=fw)
+            print("{0:.6f},{1:.6f},{2:.2f},{3},{4}".format(cluster[0], cluster[1], cluster[2], grid_id, direction),
+                  file=fw)
             # print(clustered_points)
             # print(kmeans.cluster_centers_)
             # print(g1)
     if len(g2) > 0:
+        direction = 1
         kmeans = get_cluster(g2, min(k, len(g2)))
         clustered_points = get_clusters_with_bearing(kmeans, g2)
         for cluster in clustered_points:
-            print("{0:.6f},{1:.6f},{2:.2f}".format(cluster[0], cluster[1], cluster[2]), file=fw)
+            print("{0:.6f},{1:.6f},{2:.2f},{3},{4}".format(cluster[0], cluster[1], cluster[2], grid_id, direction),
+                  file=fw)
             # print(clustered_points)
             # print(kmeans.cluster_centers_)
             # print(g2)
+    grid_id += 1
 fw.close()
 KMEANS_JS_DATA_FILE_PATH = "../media/data/kmeans_data.js"
 
