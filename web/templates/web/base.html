@@ -50,15 +50,13 @@
             var infoWin;
             function initialize() {
                 var center = new google.maps.LatLng(19.0760, 72.8777);
-
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 12,
                     center: center,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    scaleControl: true
                 });
                 infoWin = new google.maps.InfoWindow();
-
-
                 var markers = data.map(function (location, i) {
                     // location [lat,lon,accuracy,speed,bearing]
                     var latLng = new google.maps.LatLng(location[0],
@@ -72,8 +70,8 @@
                     google.maps.event.addListener(marker, 'click', function (evt) {
                         var content = "speed = " + location[3].toFixed(2) + " kmph<br>" +
                             "accuracy = " + location[2] + " m<br>" +
-                            "bearing = " + location[4] +"<br>" +
-                            "reporter_id = " + location[5]+"<br>" +
+                            "bearing = " + location[4] + "<br>" +
+                            "reporter_id = " + location[5] + "<br>" +
                             "trip_id = " + location[6];
                         infoWin.setContent(content);
                         infoWin.open(map, marker);

@@ -5,6 +5,7 @@
     <script type="text/javascript" src="/media/data/dbscan_data.js"></script>
 {% endblock %}
 
+
 {% block draw_map %}
     <script type="text/javascript">
     var map;
@@ -15,7 +16,8 @@
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
                 center: center,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                scaleControl: true
             });
             infoWin = new google.maps.InfoWindow();
 
