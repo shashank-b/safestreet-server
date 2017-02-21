@@ -41,6 +41,7 @@ pyparsing==2.1.5
 python-dateutil==2.5.3
 pytz==2016.4
 PyYAML==3.11
+requests==2.13.0
 scikit-learn==0.17.1
 scipy==0.17.1
 Shapely==1.5.17.post1
