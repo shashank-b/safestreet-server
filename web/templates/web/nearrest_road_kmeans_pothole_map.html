@@ -1,0 +1,63 @@
+{% extends 'web/base.html' %}
+{% load staticfiles %}
+
+{% block data %}
+    <script type="text/javascript" src="/media/data/nearrest_road_kmeans.js"></script>
+{% endblock %}
+
+{% block draw_map %}
+    <script type="text/javascript">
+
+        var map;
+        var infoWin;
+        function initialize() {
+            var center = new google.maps.LatLng(19.0760, 72.8777);
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: center,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+            infoWin = new google.maps.InfoWindow();
+
+            var markers = data.map(function (location, i) {
+                // location [lat,lon,bearing,grid_id,direction]
+                var latLng = new google.maps.LatLng(location[0],
+                    location[1]);
+
+                var colorString = (location[4] == 0) ? "ff0000" :"00ff00";
+                var styleIconClass = new StyledIcon(StyledIconTypes.CLASS, {color: "#"+colorString});
+
+                var directionText = (location[4] == 0) ? "A" : "B";
+                var marker = new StyledMarker({
+                    styleIcon: new StyledIcon(StyledIconTypes.MARKER, {text: directionText}, styleIconClass),
+                    position: latLng,
+                });
+{#                var marker = new google.maps.Marker({#}
+{#                    position: latLng#}
+{#                });#}
+
+                // location [lat,lon,bearing]
+                google.maps.event.addListener(marker, 'click', function (evt) {
+                    var content = "bearing = " + location[2]+"<br> grid_id = "+location[3];
+                    infoWin.setContent(content);
+                    infoWin.open(map, marker);
+                })
+                return marker;
+            });
+            var options = {
+                imagePath: '{% static "web/js/markerclusterer/images/m" %}'
+            };
+            var markerCluster = new MarkerClusterer(map, markers, options);
+        }
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+{% endblock %}
+
+{% block heading %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("h2").text("Pothole counter after clustering(kmeans) " + data.length)
+        });
+    </script>
+{% endblock %}

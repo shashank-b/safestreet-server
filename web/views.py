@@ -38,6 +38,10 @@ class KmeansMap(TemplateView):
     template_name = 'web/kmeans_pothole_map.html'
 
 
+class NearrestRoadMap(TemplateView):
+    template_name = 'web/nearrest_road_kmeans_pothole_map.html'
+
+
 def total_distance(distances):
     tot = 0
     for dist in distances:
