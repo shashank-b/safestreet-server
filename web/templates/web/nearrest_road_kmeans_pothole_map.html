@@ -23,20 +23,18 @@
 
             var markers = data.map(function (location, i) {
                 // location [lat,lon,bearing,grid_id,direction]
+                var bearing = location[2]
                 var latLng = new google.maps.LatLng(location[0],
                     location[1]);
 
                 var colorString = (location[4] == 0) ? "ff0000" :"00ff00";
                 var styleIconClass = new StyledIcon(StyledIconTypes.CLASS, {color: "#"+colorString});
 
-                var directionText = (location[4] == 0) ? "A" : "B";
+                var direction = getDirectionText(bearing);
                 var marker = new StyledMarker({
-                    styleIcon: new StyledIcon(StyledIconTypes.MARKER, {text: directionText}, styleIconClass),
+                    styleIcon: new StyledIcon(StyledIconTypes.MARKER, {text: direction}, styleIconClass),
                     position: latLng,
                 });
-{#                var marker = new google.maps.Marker({#}
-{#                    position: latLng#}
-{#                });#}
 
                 // location [lat,lon,bearing]
                 google.maps.event.addListener(marker, 'click', function (evt) {

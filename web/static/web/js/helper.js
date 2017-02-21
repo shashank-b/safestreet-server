@@ -18,3 +18,18 @@ String.prototype.hashCode = function() {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+function getDirectionText(bearing) {
+    var dir = Math.floor((bearing+22.5)/45) % 8;
+    switch (dir) {
+        case 0: return "N";
+        case 1: return "NE";
+        case 2: return "E";
+        case 3: return "SE";
+        case 4: return "S";
+        case 5: return "SW";
+        case 6: return "W";
+        case 7: return "NW";
+    }
+    return "";
+}
