@@ -1,33 +1,13 @@
 import datetime
-import shelve
 import zipfile
 from collections import deque
 
 from geopy.distance import vincenty
 
 from ride.models import Ride, Distance
-
-DB_FILE_NAME = 'mydb'
+from scripts.helper import DBHelper, DB_FILE_NAME
 
 UTC_OFFSET = 19800
-
-
-class DBHelper(object):
-    def __init__(self, db_file_name):
-        self.db = shelve.open(db_file_name, writeback=True)
-        self.last_processed_id = 'last_processed_id'
-
-    def save(self):
-        self.db.sync()
-
-    def get_last_processed_row_id(self):
-        if self.last_processed_id not in self.db:
-            return -1
-        return self.db[self.last_processed_id]
-
-    def update_last_processed_row_id(self, row_id):
-        self.db[self.last_processed_id] = row_id
-        self.db.sync()
 
 
 def compute_distance(lat_lon1, lat_lon2):

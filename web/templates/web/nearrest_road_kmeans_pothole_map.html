@@ -22,23 +22,31 @@
             infoWin = new google.maps.InfoWindow();
 
             var markers = data.map(function (location, i) {
-                // location [lat,lon,bearing,grid_id,direction]
-                var bearing = location[2]
+                // location [lat,lon,bearing,grid_id,direction,cluster_size]
                 var latLng = new google.maps.LatLng(location[0],
                     location[1]);
 
-                var colorString = (location[4] == 0) ? "ff0000" :"00ff00";
+                var bearing = location[2];
+                var grid_id = location[3];
+                var cluster_size = location[5];
+
+                var colorString = (location[4] == 0) ? "00bfff" :"FF7722";
                 var styleIconClass = new StyledIcon(StyledIconTypes.CLASS, {color: "#"+colorString});
 
                 var direction = getDirectionText(bearing);
                 var marker = new StyledMarker({
                     styleIcon: new StyledIcon(StyledIconTypes.MARKER, {text: direction}, styleIconClass),
                     position: latLng,
+                    scale: 2
                 });
 
                 // location [lat,lon,bearing]
                 google.maps.event.addListener(marker, 'click', function (evt) {
-                    var content = "bearing = " + location[2]+"<br> grid_id = "+location[3];
+                    var content =
+                        "bearing = " + bearing + "<br>" +
+                        "grid_id = " + grid_id + "<br>" +
+                        "cluster_size = " + cluster_size;
+
                     infoWin.setContent(content);
                     infoWin.open(map, marker);
                 })
@@ -56,7 +64,7 @@
 {% block heading %}
     <script type="text/javascript">
         $(document).ready(function () {
-            $("h2").text("Pothole counter after clustering(kmeans) " + data.length)
+            $("h2").text("Pothole counter after clustering(kmeans)" + data.length)
         });
     </script>
 {% endblock %}

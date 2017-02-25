@@ -22,10 +22,12 @@
             infoWin = new google.maps.InfoWindow();
 
             var markers = data.map(function (location, i) {
-                // location [lat,lon,bearing,grid_id,direction]
+                // location [lat,lon,bearing,grid_id,direction,cluster_size]
                 var latLng = new google.maps.LatLng(location[0],
                     location[1]);
                 var bearing = location[2];
+                var grid_id = location[3];
+                var cluster_size = location[5];
 
                 var colorString = (location[4] == 0) ? "ff0000" : "00ff00";
                 var styleIconClass = new StyledIcon(StyledIconTypes.CLASS, {color: "#" + colorString});
@@ -38,7 +40,10 @@
 
                 // location [lat,lon,bearing]
                 google.maps.event.addListener(marker, 'click', function (evt) {
-                    var content = "bearing = " + location[2] + "<br> grid_id = " + location[3];
+                    var content =
+                        "bearing = " + bearing + "<br>" +
+                        "grid_id = " + grid_id + "<br>" +
+                        "cluster_size = " + cluster_size;
                     infoWin.setContent(content);
                     infoWin.open(map, marker);
                 })

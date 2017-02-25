@@ -28,7 +28,9 @@ def get_query_string(lat_series, lon_series):
 
 
 print(data.head())
-def nearrest_road_api():
+
+
+def nearest_road_api():
     cnt = 1
     for i in range(N):
         lo = i * 100
@@ -45,18 +47,27 @@ def nearrest_road_api():
             print("error occured at count " + str(cnt), file=sys.stderr)
             continue
         point_list = response.get("snappedPoints")
+        duplicate_indexes = set()
+        indexes = set()
+        for point in point_list:
+            idx = point.get('originalIndex')
+            if idx not in indexes:
+                indexes.add(idx)
+            else:
+                duplicate_indexes.add(idx)
+        print(duplicate_indexes)
         for point in point_list:
             lat = float(point.get("location").get("latitude"))
             lon = float(point.get("location").get("longitude"))
             index = point.get('originalIndex')
-            data['lat'][lo + index] = lat
-            data['lon'][lo + index] = lon
+            if index not in duplicate_indexes:
+                data['lat'][lo + index] = lat
+                data['lon'][lo + index] = lon
         cnt += 1
         sleep(0.2)
         # break
 
-
-nearrest_road_api()
+nearest_road_api()
 print(data.head())
 
 NEAREST_ROAD_KMEANS_CSV_FILE_PATH = "../media/data/nearrest_road_kmeans.csv"
@@ -66,20 +77,5 @@ data.to_csv(NEAREST_ROAD_KMEANS_CSV_FILE_PATH, index=False)
 
 NEARREST_ROAD_KMEANS_JS_DATA_FILE_PATH = "../media/data/nearrest_road_kmeans.js"
 
-
-def from_csv_to_js(csv_file_path, js_file_path):
-    with open(csv_file_path) as fr:
-        header = None
-        with open(js_file_path, "w") as fw:
-            print("var data = [ ", file=fw)
-            for line in fr:
-                if header is None:
-                    header = line
-                    continue
-                print("[{0}]".format(line.strip()), file=fw, end=",")
-            print("]", file=fw)
-            fw.close()
-        fr.close()
-
-
+from helper import from_csv_to_js
 from_csv_to_js(NEAREST_ROAD_KMEANS_CSV_FILE_PATH, NEARREST_ROAD_KMEANS_JS_DATA_FILE_PATH)

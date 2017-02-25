@@ -1,7 +1,8 @@
 import operator
-from math import floor, ceil
+from math import floor
 
 import numpy as np
+from merge_close import merge
 from sklearn.cluster import KMeans
 
 MIN_LAT = 500
@@ -10,6 +11,8 @@ MIN_LON = 500
 MAX_LON = -500
 INCR_LAT = 0.001
 INCR_LON = INCR_LAT
+
+merge()
 
 MERGE_CLOSE_FILE_PATH = "../media/data/merge_data.csv"
 with open(MERGE_CLOSE_FILE_PATH) as fr:
@@ -37,9 +40,6 @@ with open(MERGE_CLOSE_FILE_PATH) as fr:
             # print(num_rows, num_cols)
             # print(num_rows*num_cols)
 
-NUM_ROWS = (MAX_LAT - MIN_LAT) / INCR_LAT
-NUM_COLS = (MAX_LON - MIN_LON) / INCR_LON
-NUM_ROWS, NUM_COLS = (int(ceil(NUM_ROWS)), int(ceil(NUM_COLS)))
 GRIDS = {}
 # 0 -> lat,
 # 1 -> lon,
@@ -143,6 +143,8 @@ def separate_direction(grid):
             loc = grid1.pop()
             new_loc = (loc[0], loc[1], loc[2], loc[3] + 360, loc[4])
             grid2.append(new_loc)
+    if len(grid1) == 0 and len(grid2) > 0 and grid2[0][BEARING_INDEX] <= 180:
+        return grid2, grid1
     return grid1, grid2
     # print("k = {0}".format(k))
     # for item in grid:
@@ -153,30 +155,48 @@ def separate_direction(grid):
 
 def get_avg_bearing(cluster_id, labels_, pothole_points):
     bearings = []
+    cluster_size = 0
     for i in range(len(labels_)):
         if labels_[i] == cluster_id:
             bearings.append(pothole_points[i][BEARING_INDEX])
-    return np.mean(bearings) % 360
+            cluster_size += 1
+    return np.mean(bearings) % 360, cluster_size
 
 
 def get_clusters_with_bearing(kmeans, pothole_points):
     clustered_points = []
     cluster_id = 0
     for cluster in kmeans.cluster_centers_:
-        avg_bearing = get_avg_bearing(cluster_id, kmeans.labels_, pothole_points)
+        avg_bearing, cluster_size = get_avg_bearing(cluster_id, kmeans.labels_, pothole_points)
         lat_center = cluster[0]
         lon_center = cluster[1]
-        clustered_points.append((lat_center, lon_center, avg_bearing))
+        clustered_points.append((lat_center, lon_center, avg_bearing, cluster_size))
         cluster_id += 1
     return clustered_points
 
 
 KMEANS_CSV_FILE_PATH = "../media/data/kmeans_cluster.csv"
 fw = open(KMEANS_CSV_FILE_PATH, "w")
-print("lat,lon,bearing,grid_id,direction", file=fw)
+print("lat,lon,bearing,grid_id,direction,cluster_size", file=fw)
 grid_id = 0
-direction = 0
+
+
 # direction = 0 and direction = 1 have bearing difference of 150
+
+def write_clusters_to_file(k, grid, direction, fw):
+    if len(grid) == 0:
+        return
+    kmeans = get_cluster(grid, min(k, len(grid)))
+    clustered_points = get_clusters_with_bearing(kmeans, grid)
+    for cluster in clustered_points:
+        lat = cluster[0]
+        lon = cluster[1]
+        avg_bearing = cluster[2]
+        cluster_size = cluster[3]
+        print("{0:.6f},{1:.6f},{2:.2f},{3},{4},{5}".format(lat, lon, avg_bearing, grid_id, direction, cluster_size),
+              file=fw)
+
+
 for grid_key in GRIDS:
     grid = GRIDS[grid_key]
     g1, g2 = separate_direction(grid)
@@ -186,39 +206,13 @@ for grid_key in GRIDS:
     #         print("k = {0}".format(k))
     #         print(g1)
     #         print(g2)
-    if len(g1) > 0:
-        direction = 0
-        kmeans = get_cluster(g1, min(k, len(g1)))
-        clustered_points = get_clusters_with_bearing(kmeans, g1)
-        for cluster in clustered_points:
-            print("{0:.6f},{1:.6f},{2:.2f},{3},{4}".format(cluster[0], cluster[1], cluster[2], grid_id, direction),
-                  file=fw)
-            # print(clustered_points)
-            # print(kmeans.cluster_centers_)
-            # print(g1)
-    if len(g2) > 0:
-        direction = 1
-        kmeans = get_cluster(g2, min(k, len(g2)))
-        clustered_points = get_clusters_with_bearing(kmeans, g2)
-        for cluster in clustered_points:
-            print("{0:.6f},{1:.6f},{2:.2f},{3},{4}".format(cluster[0], cluster[1], cluster[2], grid_id, direction),
-                  file=fw)
-            # print(clustered_points)
-            # print(kmeans.cluster_centers_)
-            # print(g2)
+    write_clusters_to_file(k, g1, 0, fw)
+    write_clusters_to_file(k, g2, 1, fw)
     grid_id += 1
 fw.close()
+
 KMEANS_JS_DATA_FILE_PATH = "../media/data/kmeans_data.js"
 
-with open(KMEANS_CSV_FILE_PATH) as fr:
-    header = None
-    with open(KMEANS_JS_DATA_FILE_PATH, "w") as fw:
-        print("var data = [ ", file=fw)
-        for line in fr:
-            if header is None:
-                header = line
-                continue
-            print("[{0}]".format(line.strip()), file=fw, end=",")
-        print("]", file=fw)
-        fw.close()
-    fr.close()
+from helper import from_csv_to_js
+
+from_csv_to_js(KMEANS_CSV_FILE_PATH, KMEANS_JS_DATA_FILE_PATH)
