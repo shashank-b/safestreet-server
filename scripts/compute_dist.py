@@ -83,6 +83,8 @@ def get_distance_and_date(gps_log):
     return dist, date
 
 
+
+
 def run():
     db = DBHelper(DB_FILE_NAME)
     id = db.get_last_processed_row_id()

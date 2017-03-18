@@ -53,7 +53,8 @@
                 return marker;
             });
             var options = {
-                imagePath: '{% static "web/js/markerclusterer/images/m" %}'
+                imagePath: '{% static "web/js/markerclusterer/images/m" %}',
+                maxZoom: 17
             };
             var markerCluster = new MarkerClusterer(map, markers, options);
         }

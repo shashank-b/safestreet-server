@@ -37,15 +37,4 @@ def run():
         print("]", file=fw, end="")
 
         # lats, lons = zip(*centermost_points)
-        # rep_points = pd.DataFrame({'lon': lons, 'lat': lats})
-        # rs = rep_points.apply(lambda row: df[(df['lat'] == row['lat']) & (df['lon'] == row['lon'])].iloc[0], axis=1)
-        #
-        # fig, ax = plt.subplots(figsize=[10, 6])
-        # rs_scatter = ax.scatter(rs['lon'], rs['lat'], c='#99cc99', edgecolor='None', alpha=0.7, s=120)
-        # df_scatter = ax.scatter(df['lon'], df['lat'], c='k', alpha=0.9, s=3)
-        # ax.set_title('Full data set vs DBSCAN reduced set')
-        # ax.set_xlabel('Longitude')
-        # ax.set_ylabel('Latitude')
-        # ax.legend([df_scatter, rs_scatter], ['Full set', 'Reduced set'], loc='upper right')
-        # plt.show()
 

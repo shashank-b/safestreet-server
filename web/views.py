@@ -38,6 +38,12 @@ class KmeansMap(TemplateView):
     template_name = 'web/kmeans_pothole_map.html'
 
 
+class TestMap(TemplateView):
+    template_name = 'web/testplot.html'
+
+class TestMap1(TemplateView):
+    template_name = 'web/testplot1.html'
+
 class NearrestRoadMap(TemplateView):
     template_name = 'web/nearrest_road_kmeans_pothole_map.html'
 
