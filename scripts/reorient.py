@@ -31,7 +31,9 @@ def get_pothole_timestamps(gps_log):
                     continue
                 parts = line.split(",")
                 # print(parts)
-                if (len(parts) >= 7) and parts[6] == "y":
+                # if len(parts) >= 7 and float(parts[4]) >3:
+                if len(parts) >= 7:
+                    # if len(parts) >= 7 and parts[6] == "y":
                     try:
                         timestamp = int(parts[0])
                         lat = float(parts[1])
@@ -141,8 +143,8 @@ class G(object):
 
     def __str__(self):
         return "{:.6f},{:.6f},{},{:.2f},{:.2f},{:.2f},{:.2f},{}".format(self.lat, self.lon, self.bearing, self.speed,
-                                                                     self.sd,
-                                                                     self.max_min, self.intensity,self.trip_id)
+                                                                        self.sd,
+                                                                        self.max_min, self.intensity, self.trip_id)
 
 
 def close_to_9_8(acc_row):
@@ -249,19 +251,21 @@ def reoriented_az(acc_rows, gps_rows):
                 new_ay = y * sin_x + tmp * cos_x
 
                 smq.append(A((acc.time, new_ax, new_ay, new_az)))
-                smooth_az = smooth(smq)
+                smooth_a = smooth(smq)
                 while len(smq) > 0 and smq[-1].time - smq[0].time > 500:
                     smq.popleft()
-                eq.append(smooth_az)
+                eq.append(smooth_a)
+
             if len(eq) > 0 and eq[-1].time - eq[0].time >= 1000:
                 # max_minus_min_win, sd, mean = sd_and_max_min(eq)
                 max_min, sd, mean = sd_and_max_min(eq)
-                for g in gps_rows:
-                    if eq[0].time <= g.time <= eq[-1].time:
-                        # print_deque(eq, g.time)
-                        if sd > g.sd:
-                            g.sd = sd
-                            g.max_min = max_min
+                if eq[-1].time - eq[0].time <= 1500:
+                    for g in gps_rows:
+                        if eq[0].time <= g.time <= eq[-1].time:
+                            # print_deque(eq, g.time)
+                            if sd > g.sd:
+                                g.sd = sd
+                                g.max_min = max_min
                 while eq[-1].time - eq[0].time >= 500:
                     eq.popleft()
                     # print(
@@ -305,7 +309,7 @@ def print_pothole_reports(gps_rows):
     print("len ={}".format(len(gps_rows)))
 
 
-def print_gps_row(gps_rows,trip):
+def print_gps_row(gps_rows, trip):
     # gps_file_name = None
     # acc_file_name = None
     # cnt = 0
@@ -314,7 +318,7 @@ def print_gps_row(gps_rows,trip):
         #     cnt +=1
         #     gps_file_name = gps_file.name
         #     acc_file_name = acc_file.name
-        if g.sd != -1:
+        if g.sd > 0 and g.sd * g.sd >= .2:
             feature_vector = [g.sd, g.max_min]
             pred = clf.predict([feature_vector])[0]
             if pred.strip() == '1':
@@ -324,12 +328,20 @@ def print_gps_row(gps_rows,trip):
                 print(g, file=fw)
 
 
+def print_gps_row2(gps_rows):
+    for g in gps_rows:
+        print("{:.6f},{:.6f}".format(g[1], g[2]), file=fw)
+
+
 def reorient():
     load_model()
     trips = Ride.objects.all()
     for trip in trips:
         acc_log = trip.acc_log
         gps_rows = get_pothole_timestamps(trip.gps_log)
+        # print_gps_row2(gps_rows)
+        # print(len(gps_rows))
+        # continue
         if len(gps_rows) == 0:
             continue
         try:
@@ -377,9 +389,9 @@ def reorient():
                     gps_rows[i] = G(gps_rows[i])
                 get_pothole_info(acc_rows, gps_rows)
                 # print_pothole_reports(gps_rows)
-                print_gps_row(gps_rows,trip)
+                print_gps_row(gps_rows, trip)
             acc_log.close()
             zip_file.close()
         except Exception as ex:
-            print(trip.acc_log.name,trip.gps_log.name)
+            print(trip.acc_log.name, trip.gps_log.name)
             print(ex)
