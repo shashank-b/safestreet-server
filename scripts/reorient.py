@@ -370,5 +370,5 @@ def reorient():
             acc_log.close()
             zip_file.close()
         except Exception as ex:
-            print(acc_log.name, gps_rows.name)
+            print(trip.acc_log.name,trip.gps_log.name)
             print(ex)
