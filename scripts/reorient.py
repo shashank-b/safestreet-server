@@ -325,7 +325,8 @@ def print_gps_row(gps_rows, trip):
                 dist = clf.decision_function([feature_vector])
                 g.intensity = dist[0]
                 g.trip_id = trip.id
-                print(g, file=fw)
+                if g.intensity >= 1.0:
+                    print(g, file=fw)
 
 
 def print_gps_row2(gps_rows):

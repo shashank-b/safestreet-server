@@ -55,7 +55,7 @@ def from_csv_to_js(csv_file_path, js_file_path):
                 if header is None:
                     header = line
                     continue
-                print("[{0}]".format(line.strip()), file=fw, end=",")
+                print("[{}]".format(line.strip()), file=fw, end=",")
             print("]", file=fw)
             fw.close()
         fr.close()
