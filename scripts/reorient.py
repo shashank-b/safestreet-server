@@ -44,8 +44,19 @@ def get_pothole_timestamps(gps_log):
     return pothole_timestamp_list
 
 
+fw = None
+
+
+def init():
+    global fw
+    fw = open("media/data/pothole_pred.csv", "w")
+    print("lat,lon,bearing,speed,sd,max_min,intensity", file=fw)
+
+
 def run():
+    init()
     reorient()
+    fw.close()
     # unordered_timestamps()
 
 
@@ -121,11 +132,12 @@ class G(object):
         self.bearing = gps_tup[4]
         self.sd = -1
         self.max_min = -1
+        self.intensity = -1
 
     def __str__(self):
-        return "{:.6f},{:.6f},{},{:.2f},{:.2f},{:.2f}".format(self.lat, self.lon, self.bearing, self.speed,
-                                                              self.sd,
-                                                              self.max_min)
+        return "{:.6f},{:.6f},{},{:.2f},{:.2f},{:.2f},{:.2f}".format(self.lat, self.lon, self.bearing, self.speed,
+                                                                     self.sd,
+                                                                     self.max_min, self.intensity)
 
 
 def close_to_9_8(acc_row):
@@ -298,9 +310,12 @@ def print_gps_row(gps_rows, gps_file, acc_file):
         #     gps_file_name = gps_file.name
         #     acc_file_name = acc_file.name
         if g.sd != -1:
-            pred = clf.predict([[g.sd, g.max_min]])[0]
+            feature_vector = [g.sd, g.max_min]
+            pred = clf.predict([feature_vector])[0]
             if pred.strip() == '1':
-                print(g)
+                dist = clf.decision_function([feature_vector])
+                g.intensity = dist[0]
+                print(g, file=fw)
 
 
 def reorient():
