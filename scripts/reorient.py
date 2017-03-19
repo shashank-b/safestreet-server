@@ -32,12 +32,16 @@ def get_pothole_timestamps(gps_log):
                 parts = line.split(",")
                 # print(parts)
                 if (len(parts) == 7) and parts[6] == "y":
-                    timestamp = int(parts[0])
-                    lat = float(parts[1])
-                    lon = float(parts[2])
-                    speed = float(parts[4]) * 3.6
-                    bearing = float(parts[5])
-                    pothole_timestamp_list.append((timestamp, lat, lon, speed, bearing))
+                    try:
+                        timestamp = int(parts[0])
+                        lat = float(parts[1])
+                        lon = float(parts[2])
+                        speed = float(parts[4]) * 3.6
+                        bearing = float(parts[5])
+                        pothole_timestamp_list.append((timestamp, lat, lon, speed, bearing))
+                    except Exception as ex:
+                        print(ex)
+                        continue
             f.close()
     zip_file.close()
     gps_log.close()
@@ -331,6 +335,7 @@ def reorient():
             file_names = zip_file.namelist()
         except zipfile.BadZipFile as ex:
             print("bad zip file {0}".format(acc_log.name))
+            continue
         try:
             for file_name in file_names:
                 acc_rows = []
@@ -349,10 +354,14 @@ def reorient():
                             continue
                         parts = line.split(",")
                         if len(parts) == 4:
-                            time = int(parts[0])
-                            ax = float(parts[1])
-                            ay = float(parts[2])
-                            az = float(parts[3])
+                            try:
+                                time = int(parts[0])
+                                ax = float(parts[1])
+                                ay = float(parts[2])
+                                az = float(parts[3])
+                            except Exception as ex:
+                                print(ex)
+                                continue
                             # print(time, ax, ay, az)
                             acc_rows.append((time, ax, ay, az))
                     # print(pothole_timestamps)
