@@ -61,7 +61,7 @@ def get_distance_and_date(gps_log):
                     date = datetime.datetime.utcfromtimestamp(gps_timestamp / 1000 + UTC_OFFSET)
 
                 # print(parts)
-                if len(parts) == 7:
+                if len(parts) >= 7:
                     lat = parts[1]
                     lon = parts[2]
                     lat_lon = (lat, lon)
@@ -81,8 +81,6 @@ def get_distance_and_date(gps_log):
     zip_file.close()
     gps_log.close()
     return dist, date
-
-
 
 
 def run():

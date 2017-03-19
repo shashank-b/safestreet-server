@@ -41,7 +41,7 @@ def run():
                             continue
                         parts = line.split(",")
                         # print(parts)
-                        if (len(parts) == 7) and parts[6] == "y":
+                        if (len(parts) >= 7) and parts[6] == "y":
                             lat = parts[1]
                             lon = parts[2]
                             acc = parts[3]

@@ -31,7 +31,7 @@ def get_pothole_timestamps(gps_log):
                     continue
                 parts = line.split(",")
                 # print(parts)
-                if (len(parts) == 7) and parts[6] == "y":
+                if (len(parts) >= 7) and parts[6] == "y":
                     try:
                         timestamp = int(parts[0])
                         lat = float(parts[1])
