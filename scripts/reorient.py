@@ -54,7 +54,7 @@ fw = None
 def init():
     global fw
     fw = open("media/data/pothole_pred.csv", "w")
-    print("lat,lon,bearing,speed,sd,max_min,intensity", file=fw)
+    print("lat,lon,bearing,speed,sd,max_min,intensity,trip_id", file=fw)
 
 
 def run():
@@ -137,11 +137,12 @@ class G(object):
         self.sd = -1
         self.max_min = -1
         self.intensity = -1
+        self.trip_id = -1
 
     def __str__(self):
-        return "{:.6f},{:.6f},{},{:.2f},{:.2f},{:.2f},{:.2f}".format(self.lat, self.lon, self.bearing, self.speed,
+        return "{:.6f},{:.6f},{},{:.2f},{:.2f},{:.2f},{:.2f},{}".format(self.lat, self.lon, self.bearing, self.speed,
                                                                      self.sd,
-                                                                     self.max_min, self.intensity)
+                                                                     self.max_min, self.intensity,self.trip_id)
 
 
 def close_to_9_8(acc_row):
@@ -304,7 +305,7 @@ def print_pothole_reports(gps_rows):
     print("len ={}".format(len(gps_rows)))
 
 
-def print_gps_row(gps_rows, gps_file, acc_file):
+def print_gps_row(gps_rows,trip):
     # gps_file_name = None
     # acc_file_name = None
     # cnt = 0
@@ -319,6 +320,7 @@ def print_gps_row(gps_rows, gps_file, acc_file):
             if pred.strip() == '1':
                 dist = clf.decision_function([feature_vector])
                 g.intensity = dist[0]
+                g.trip_id = trip.id
                 print(g, file=fw)
 
 
@@ -375,7 +377,7 @@ def reorient():
                     gps_rows[i] = G(gps_rows[i])
                 get_pothole_info(acc_rows, gps_rows)
                 # print_pothole_reports(gps_rows)
-                print_gps_row(gps_rows, trip.gps_log, trip.acc_log)
+                print_gps_row(gps_rows,trip)
             acc_log.close()
             zip_file.close()
         except Exception as ex:
