@@ -331,7 +331,7 @@ def get_intensity(acc_rows, g, trip):
         if event_index < len(acc_rows):
             print("a.time = {} g.time = {} |at-et| = {}".format(acc_rows[event_index][0], g.time,
                                                                 abs(acc_rows[event_index][0] - g.time)))
-            print("filename acclogs = {} gpslogs = {}".format(trip.acc_log.name,trip.gps_log.name))
+            print("filename acclogs = {} gpslogs = {}".format(trip.acc_log.name, trip.gps_log.name))
         return g
 
     # print("going 15 second back")
@@ -448,7 +448,7 @@ def get_acc_rows(acc_log):
         zip_file = zipfile.ZipFile(acc_log)
         file_names = zip_file.namelist()
     except zipfile.BadZipFile as ex:
-        print("bad zip file {0}".format(acc_log.name))
+        print("bad zip file =  {0}".format(acc_log.name))
         return acc_rows
     for file_name in file_names:
         # print(file_name)
@@ -481,6 +481,7 @@ def get_acc_rows(acc_log):
             # print("========")
             f.close()
     zip_file.close()
+    acc_log.close()
     acc_rows.sort()
     return acc_rows
 
