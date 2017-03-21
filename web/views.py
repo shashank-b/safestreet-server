@@ -23,7 +23,7 @@ class AllComplaints(APIView):
 
 
 class RawPotholeMap(TemplateView):
-    template_name = 'web/raw_pothole_map.html'
+    template_name = 'web/intensity.html'
 
 
 class PrivacyPolicyView(TemplateView):
@@ -41,8 +41,10 @@ class KmeansMap(TemplateView):
 class TestMap(TemplateView):
     template_name = 'web/testplot.html'
 
+
 class TestMap1(TemplateView):
     template_name = 'web/testplot1.html'
+
 
 class NearrestRoadMap(TemplateView):
     template_name = 'web/nearrest_road_kmeans_pothole_map.html'
