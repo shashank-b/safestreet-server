@@ -7,6 +7,7 @@
 
 {% block draw_map %}
     <script type="text/javascript">
+{#    console.log(data)#}
 
         var map;
         var infoWin;
@@ -23,13 +24,15 @@
 
             var markers = data.map(function (location, i) {
                 // location [lat,lon,bearing,grid_id,direction,cluster_size]
+{#                console.log(i)#}
                 var latLng = new google.maps.LatLng(location[0],
                     location[1]);
                 var bearing = location[2];
                 var speed = location[3];
-                var intensity = location[4];
+                var intensity = location[6];
+                var trip_id = location[7];
 
-                var colorString = (location[4] >= 0) ? "ff0000" : "00ff00";
+                var colorString = (intensity >= 0) ? "ff0000" : "00ff00";
                 var styleIconClass = new StyledIcon(StyledIconTypes.CLASS, {color: "#" + colorString});
 
                 var direction = getDirectionText(bearing);
@@ -43,7 +46,9 @@
                     var content =
                         "bearing = " + bearing + "<br>" +
                         "speed = " + speed + " kmph<br>" +
-                        "intensity = " + intensity;
+                        "intensity = " + intensity + "<br>" +
+                        "trip_id = " + trip_id;
+
                     infoWin.setContent(content);
                     infoWin.open(map, marker);
                 })
