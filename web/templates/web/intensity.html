@@ -27,9 +27,9 @@
                     location[1]);
                 var bearing = location[2];
                 var speed = location[3];
-                var intensity = location[6];
+                var intensity = location[4];
 
-                var colorString = (location[4] == 0) ? "ff0000" : "00ff00";
+                var colorString = (location[4] >= 0) ? "ff0000" : "00ff00";
                 var styleIconClass = new StyledIcon(StyledIconTypes.CLASS, {color: "#" + colorString});
 
                 var direction = getDirectionText(bearing);

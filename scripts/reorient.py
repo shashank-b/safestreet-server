@@ -131,7 +131,24 @@ class A(object):
         return "{},{:.2f},{:.2f},{:.2f}".format(self.time, self.ax, self.ay, self.az)
 
 
+def print_error(ret):
+    if ret == G.NO_POINT_CLOSE_TO_9_8:
+        return "no point close to 9.8"
+    if ret == G.NO_POINT_CLOSE_TO_REPORT:
+        return "no point close to report"
+    if ret == G.READ_FROM_NEXT_ACC_FILE:
+        return "reading from next acc file"
+    if ret == G.SUCCESS:
+        return "successs"
+    return "invalid"
+
+
 class G(object):
+    NO_POINT_CLOSE_TO_REPORT = 2
+    NO_POINT_CLOSE_TO_9_8 = 3
+    SUCCESS = 0
+    READ_FROM_NEXT_ACC_FILE = 4
+
     def __init__(self, gps_tup):
         self.time = gps_tup[0]
         self.lat = gps_tup[1]
@@ -326,14 +343,21 @@ def get_intensity(acc_rows, g, trip):
     event_index = bisect.bisect(acc_rows, (g.time,))
     start_index = event_index - 1
     if event_index >= len(acc_rows) or abs(acc_rows[event_index][0] - g.time) >= 1000:
-        print("event_index is not close to acc time")
-        print("event_index = {} len(acc_rows) = {}".format(event_index, len(acc_rows)))
+        print(trip.id, "event_index is not close to acc time")
+        print(trip.id, "event_index = {} len(acc_rows) = {} acc_rows[-1].time = {}, g.time=  {}".format(event_index,
+                                                                                                        len(acc_rows),
+                                                                                                        acc_rows[-1][0],
+                                                                                                        g.time))
         if event_index < len(acc_rows):
-            print("a.time = {} g.time = {} |at-et| = {}".format(acc_rows[event_index][0], g.time,
-                                                                abs(acc_rows[event_index][0] - g.time)))
-            print("filename acclogs = {} gpslogs = {}".format(trip.acc_log.name, trip.gps_log.name))
-        return g
-
+            print(trip.id, "a.time = {} g.time = {} |at-et| = {} acc_log = {}".format(acc_rows[event_index][0], g.time,
+                                                                                      abs(acc_rows[event_index][
+                                                                                              0] - g.time),
+                                                                                      trip.acc_log.name))
+            # print("filename acclogs = {} gpslogs = {}".format(trip.acc_log.name, trip.gps_log.name))
+            return G.NO_POINT_CLOSE_TO_REPORT
+        if event_index >= len(acc_rows):
+            print(trip.id, "reading acc from next file")
+            return G.READ_FROM_NEXT_ACC_FILE
     # print("going 15 second back")
     while start_index > 0 and (acc_rows[event_index][0] - acc_rows[start_index][0]) <= 15000:
         start_index -= 1
@@ -353,8 +377,8 @@ def get_intensity(acc_rows, g, trip):
         mean_az = sum_az / cnt
         # print("calculating mean for reor")
     else:
-        print("no point close to 9.8")
-        return g
+        # print(trip.id,"no point close to 9.8")
+        return G.NO_POINT_CLOSE_TO_9_8
     # print("adding 500 ms worth of smooth data to queue")
     while start_index < len(acc_rows) and acc_rows[start_index][0] <= (acc_rows[event_index][0] - 1000):
         a = A(acc_rows[start_index])
@@ -380,7 +404,7 @@ def get_intensity(acc_rows, g, trip):
         while smq[-1].time - smq[0].time >= 500:
             smq.popleft()
         start_index += 1
-    return g
+    return G.SUCCESS
 
 
 clf = None
@@ -481,23 +505,59 @@ def get_acc_rows(acc_log):
             # print("========")
             f.close()
     zip_file.close()
-    acc_log.close()
-    acc_rows.sort()
+    # acc_log.close()
+    if not is_sorted(acc_rows):
+        acc_rows.sort()
     return acc_rows
+
+
+def get_phone_serial(acc_log):
+    return acc_log.name.split('.')[2]
+
+
+def is_sorted(lst):
+    return all(x <= y for x, y in zip(lst, lst[1:]))
 
 
 def reorient():
     load_model()
-    trips = Ride.objects.all()
-    for trip in trips:
+    trips = Ride.objects.order_by('rider__id', 'acc_log')
+    j = 0
+    n = len(trips)
+    while j < n:
+        trip = trips[j]
         gps_rows = get_pothole_timestamps(trip.gps_log)
         if len(gps_rows) == 0:
+            j += 1
             continue
         acc_rows = get_acc_rows(trip.acc_log)
         if len(acc_rows) == 0:
+            j += 1
             continue
         gps_rows.sort()
         for i in range(len(gps_rows)):
             gps_rows[i] = G(gps_rows[i])
-            get_intensity(acc_rows, gps_rows[i], trip)
+            ret = get_intensity(acc_rows, gps_rows[i], trips[j])
+            if ret == G.READ_FROM_NEXT_ACC_FILE:
+                if j + 1 < n and trips[j].rider.id == trips[j + 1].rider.id and get_phone_serial(
+                        trips[j].acc_log) == get_phone_serial(trips[j + 1].acc_log):
+                    print(trips[j].id, "reading from next file$$$")
+                    acc_rows2 = get_acc_rows(trips[j + 1].acc_log)
+                    print("len(acc_rows) = {}, len(acc_rows2) = {}".format(len(acc_rows), len(acc_rows2)))
+                    if len(acc_rows2) == 0:
+                        print("empty acc file {}".format(trips[j + 1].acc_log.name))
+                    if len(acc_rows2) > 0:
+                        print(acc_rows[-1], acc_rows2[0])
+                    if len(acc_rows2) > 0 and (acc_rows2[0][0] - acc_rows[-1][0]) <= 50:
+                        acc_rows += acc_rows2
+                        ret = get_intensity(acc_rows, gps_rows[i], trips[j + 1])
+                        print(trips[j].id, print_error(ret))
+                else:
+                    print("acc logs from different riders")
         print_gps_row(gps_rows, trip)
+        trips[j].acc_log.close()
+        j += 1
+
+
+def get_timestamp_from_filename(gps_log):
+    return int(gps_log.name.split('.')[3])
