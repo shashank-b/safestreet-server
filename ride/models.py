@@ -41,11 +41,11 @@ class Location(models.Model):
     snapped_lat = models.FloatField(default=0)
     snapped_lon = models.FloatField(default=0)
     # in kmph
-    speed = models.FloatField(default=0)
+    speed = models.FloatField(default=-1)
     # in meters
-    accuracy = models.FloatField(default=0)
+    accuracy = models.FloatField(default=-1)
     # in degree
-    bearing = models.FloatField(default=0)
+    bearing = models.FloatField(default=-1)
 
 
 class Grid(models.Model):
@@ -108,6 +108,6 @@ class Pothole(models.Model):
         null=True,
         blank=True
     )
-    sd = models.FloatField(default=0)
-    max_min = models.FloatField(default=0)
-    intensity = models.FloatField(default=0)
+    sd = models.FloatField(default=-1)
+    max_min = models.FloatField(default=-1)
+    intensity = models.FloatField(default=-100)
