@@ -2,43 +2,20 @@ import operator
 from math import floor
 
 import numpy as np
-from merge_close import merge
 from sklearn.cluster import KMeans
 
-MIN_LAT = 500
-MAX_LAT = -500
-MIN_LON = 500
-MAX_LON = -500
+from ride.models import Pothole, PotholeCluster, Grid
+
 INCR_LAT = 0.001
 INCR_LON = INCR_LAT
 
-merge()
 
-MERGE_CLOSE_FILE_PATH = "../media/data/merge_data.csv"
-with open(MERGE_CLOSE_FILE_PATH) as fr:
-    header_len = -1
-    for line in fr:
-        parts = line.split(",")
-        if header_len == -1:
-            header_len = len(parts)
-            continue
-        if len(parts) == header_len:
-            lat = float(parts[0])
-            lon = float(parts[1])
-            MIN_LAT = min(MIN_LAT, lat)
-            MAX_LAT = max(MAX_LAT, lat)
+class Constants(object):
+    anchor_lat = 9.09023
+    anchor_lon = 72.786138
+    INCR_LAT = 0.001
+    INCR_LON = INCR_LAT
 
-            MIN_LON = min(MIN_LON, lon)
-            MAX_LON = max(MAX_LON, lon)
-
-            # print(min_lat, max_lat)
-
-            # print(min_lon, max_lon)
-            # num_rows = (max_lat - min_lat) / .001
-            # num_cols = (max_lon - min_lon) / .001
-            # num_rows, num_cols = (int(ceil(num_rows)), int(ceil(num_cols)))
-            # print(num_rows, num_cols)
-            # print(num_rows*num_cols)
 
 GRIDS = {}
 # 0 -> lat,
@@ -53,104 +30,77 @@ LONG_INDEX = 1
 SPEED_INDEX = 2
 BEARING_INDEX = 3
 TRIP_ID_INDEX = 4
-
-with open(MERGE_CLOSE_FILE_PATH) as fr:
-    header_len = -1
-    for line in fr:
-        parts = line.split(",")
-        if header_len == -1:
-            header_len = len(parts)
-            continue
-        if len(parts) == header_len:
-            lat = float(parts[0])
-            lon = float(parts[1])
-            speed = float(parts[3])
-            bearing = float(parts[4])
-            trip_id = int(parts[6])
-            r = int(floor((lat - MIN_LAT) / INCR_LAT))
-            c = int(floor((lon - MIN_LON) / INCR_LON))
-            index = str(r) + "," + str(c)
-            val = (lat, lon, speed, bearing, trip_id)
-            if index in GRIDS:
-                GRIDS[index].append(val)
-            else:
-                GRIDS[index] = [val]
+INTENSITY_INDEX = 5
 
 
-def get_k(grid):
+def get_k(list_of_potholes):
     """
-    tuple = (lat,lon,speed,bearing,trip_id)
-    :param grid:
-    :type grid: list of tuples
+    :param list_of_potholes: list of models.Pothole
+    :type list_of_potholes: list of models.Pothole
     :return:
-    :rtype:
+    :rtype: int
     """
-    # for
     trip_id_count = {}
-    for location in grid:
-        trip_id = location[TRIP_ID_INDEX]
+    for pothole in list_of_potholes:
+        trip_id = pothole.ride.id
         if trip_id not in trip_id_count:
             trip_id_count[trip_id] = 1
         else:
             trip_id_count[trip_id] += 1
     pothole_count_list = list(trip_id_count.values())
     pothole_count_list.sort()
-    median_index = len(pothole_count_list) - 1
+    median_index = len(pothole_count_list)
     median_index //= 2
     return pothole_count_list[median_index]
 
 
 def get_cluster(grid, k):
     lat_long_list = []
-    for location in grid:
-        lat_long_list.append((location[LAT_INDEX], location[LONG_INDEX]))
-
+    for pothole in grid:
+        lat_long_list.append(
+            (pothole.location.lattitude, pothole.location.longitude)
+        )
     X = np.array(lat_long_list)
     kmeans = KMeans(n_clusters=k).fit(X)
     return kmeans
 
 
-def separate_direction(grid):
+def separate_direction(list_of_potholes):
     """
-    :param grid: list of tuples
-    :type grid:
+    :param list_of_potholes: list of model.Pothole
+    :type list
     :return:
     :rtype:
-    grid = [(lat, lon, speed, bearing, trip_id),(lat, lon, speed, bearing, trip_id)]
+    grid = [model.Pothole, model.Pothole]
     """
-    grid.sort(key=operator.itemgetter(BEARING_INDEX), reverse=True)
+    list_of_potholes.sort(key=operator.attrgetter('location.bearing'), reverse=True)
     partition_index = 0
     prev_loc = None
-    for location in grid:
+    for pothole in list_of_potholes:
         if prev_loc is None:
-            prev_loc = location
+            prev_loc = pothole
             continue
-        if prev_loc[BEARING_INDEX] - location[BEARING_INDEX] >= 150:
+        if prev_loc.location.bearing - pothole.location.bearing >= 150:
             break
         partition_index += 1
     # print(partition_index)
     # smaller bearing
     # grid1 = [180,179,0]
-    grid1 = grid[partition_index + 1:]
+    grid1 = list_of_potholes[partition_index + 1:]
 
     # larger bearing
     # grid2 = [359,355,340]
-    grid2 = grid[:partition_index + 1]
+    grid2 = list_of_potholes[:partition_index + 1]
 
     # moving 0-10 degree bearing to grid2 with bearing = bearing + 360
-    if len(grid2) > 0 and grid2[0][BEARING_INDEX] > 350:
-        while len(grid1) > 0 and grid1[-1][BEARING_INDEX] < 10:
+    if len(grid2) > 0 and grid2[0].location.bearing > 350:
+        while len(grid1) > 0 and grid1[-1].location.bearing < 10:
             loc = grid1.pop()
-            new_loc = (loc[0], loc[1], loc[2], loc[3] + 360, loc[4])
-            grid2.append(new_loc)
-    if len(grid1) == 0 and len(grid2) > 0 and grid2[0][BEARING_INDEX] <= 180:
+            loc.location.bearing += 360
+            grid2.append(loc)
+    if len(grid1) == 0 and len(grid2) > 0 and grid2[0].location.bearing <= 180:
         return grid2, grid1
     return grid1, grid2
-    # print("k = {0}".format(k))
-    # for item in grid:
-    # b = item[BEARING_INDEX]
-    # if 0 <= b <= 10 or 0 <= (b + 10) % 360 <= 10:
-    # print(item[LAT_INDEX], item[LONG_INDEX], item[BEARING_INDEX], item[SPEED_INDEX], item[TRIP_ID_INDEX])
 
 
 def get_avg_bearing(cluster_id, labels_, pothole_points):
@@ -175,44 +125,67 @@ def get_clusters_with_bearing(kmeans, pothole_points):
     return clustered_points
 
 
-KMEANS_CSV_FILE_PATH = "../media/data/kmeans_cluster.csv"
-fw = open(KMEANS_CSV_FILE_PATH, "w")
-print("lat,lon,bearing,grid_id,direction,cluster_size", file=fw)
-grid_id = 0
+# KMEANS_CSV_FILE_PATH = "../media/data/pothole_clusters_with_intensity.csv"
+# fw = open(KMEANS_CSV_FILE_PATH, "w")
+# print("lat,lon,bearing,speed,intensity,grid_id,label", file=fw)
 
 
 # direction = 0 and direction = 1 have bearing difference of 150
 
-def write_clusters_to_file(k, grid, direction, fw):
-    if len(grid) == 0:
+def save_clusters_to_db(k, list_of_potholes):
+    if len(list_of_potholes) == 0:
         return
-    kmeans = get_cluster(grid, min(k, len(grid)))
-    clustered_points = get_clusters_with_bearing(kmeans, grid)
-    for cluster in clustered_points:
-        lat = cluster[0]
-        lon = cluster[1]
-        avg_bearing = cluster[2]
-        cluster_size = cluster[3]
-        print("{0:.6f},{1:.6f},{2:.2f},{3},{4},{5}".format(lat, lon, avg_bearing, grid_id, direction, cluster_size),
-              file=fw)
+    kmeans = get_cluster(list_of_potholes, min(k, len(list_of_potholes)))
+    current_cluster_id = -1
+    for i in range(len(kmeans.labels_)):
+        pothole = list_of_potholes[i]
+        label = kmeans.labels_[i]
+        center_lat = kmeans.cluster_centers_[label][0]
+        center_lon = kmeans.cluster_centers_[label][1]
+        if current_cluster_id < label:
+            row = (center_lat - Constants.anchor_lat) // Constants.INCR_LAT
+            col = (center_lat - Constants.anchor_lon) // Constants.INCR_LON
+            gs = Grid.objects.filter(row=row, col=col)
+            if gs.exists():
+                grid = gs[0]
+            else:
+                grid = Grid(row=row, col=col)
+                grid.save()
+            pc = PotholeCluster.objects.filter(
+                center_lat=center_lat,
+                center_lon=center_lon
+            )
+            if not pc.exists():
+                pc = PotholeCluster(
+                    center_lat=center_lat,
+                    center_lon=center_lon,
+                    grid=grid
+                )
+                pc.save()
+            else:
+                pc = pc[0]
+            current_cluster_id = label
+        pothole.pothole_cluster = pc
+        pothole.save()
 
 
-for grid_key in GRIDS:
-    grid = GRIDS[grid_key]
-    g1, g2 = separate_direction(grid)
-    k = get_k(grid)
-    # if len(g1) > 0 and len(g2) > 0:
-    #     if len(g1) < k or len(g2) < k:
-    #         print("k = {0}".format(k))
-    #         print(g1)
-    #         print(g2)
-    write_clusters_to_file(k, g1, 0, fw)
-    write_clusters_to_file(k, g2, 1, fw)
-    grid_id += 1
-fw.close()
+def run():
+    potholes = Pothole.objects.all()
+    for pothole in potholes:
+        lat = pothole.location.lattitude
+        lon = pothole.location.longitude
+        r = int(floor((lat - Constants.anchor_lat) / INCR_LAT))
+        c = int(floor((lon - Constants.anchor_lon) / INCR_LON))
+        index = str(r) + "," + str(c)
+        val = pothole
+        if index in GRIDS:
+            GRIDS[index].append(val)
+        else:
+            GRIDS[index] = [val]
 
-KMEANS_JS_DATA_FILE_PATH = "../media/data/kmeans_data.js"
-
-from helper import from_csv_to_js
-
-from_csv_to_js(KMEANS_CSV_FILE_PATH, KMEANS_JS_DATA_FILE_PATH)
+    for grid_key in GRIDS:
+        list_of_potholes = GRIDS[grid_key]
+        g1, g2 = separate_direction(list_of_potholes)
+        k = get_k(list_of_potholes)
+        save_clusters_to_db(k, g1)
+        save_clusters_to_db(k, g2)

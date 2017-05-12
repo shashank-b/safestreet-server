@@ -2,24 +2,23 @@ import sys
 from time import sleep
 
 import requests
-from numpy import genfromtxt
-from pandas import DataFrame
 
-API_KEY = "AIzaSyBnrUwvw1vstLchyusZbXIyEZTaGROP3aE"
+from ride.models import PotholeCluster
+
+API_KEY = "AIzaSyDxEK0HgdHN_tGNLQ8hPC41GExS4KzGjtE"
 BASE_URL = "https://roads.googleapis.com/v1/nearestRoads?points={0}&key={1}"
-KMEANS_CSV_FILE_PATH = "../media/data/kmeans_cluster.csv"
-MAX_NUM_OF_REQUESTS = 100
+# INPUT_CSV_FILE_PATH = "../media/data/markers.csv"
+# OUTPUT_CSV_FILE_PATH = "../media/data/markers_snapped.csv"
 
-data = genfromtxt(KMEANS_CSV_FILE_PATH, names=True, delimiter=',')
-data = DataFrame(data)
-
-lats = data['lat']
-lons = data['lon']
-
-N = len(lats) // MAX_NUM_OF_REQUESTS
+MAX_NUM_OF_QUERIES_PER_REQUEST = 100
 
 
-def get_query_string(lat_series, lon_series):
+def get_query_string(locs):
+    lat_series = []
+    lon_series = []
+    for l in locs:
+        lat_series.append(l.center_lat)
+        lon_series.append(l.center_lon)
     lat_lon_list = list(zip(lat_series, lon_series))
     new_lat_lon_list = []
     for t in lat_lon_list:
@@ -27,15 +26,16 @@ def get_query_string(lat_series, lon_series):
     return "|".join(new_lat_lon_list)
 
 
-print(data.head())
-
-
 def nearest_road_api():
     cnt = 1
+    locations = PotholeCluster.objects.filter(snapped_lat=0)
+    N = len(locations) // MAX_NUM_OF_QUERIES_PER_REQUEST
+    print("len locs = {}".format(len(locations)))
     for i in range(N):
-        lo = i * 100
-        hi = (i + 1) * 100
-        query_str = get_query_string(lats[lo:hi], lons[lo:hi])
+        lo = i * MAX_NUM_OF_QUERIES_PER_REQUEST
+        hi = (i + 1) * MAX_NUM_OF_QUERIES_PER_REQUEST
+        locs = locations[lo:hi]
+        query_str = get_query_string(locs)
         # print(query_str)
         url = BASE_URL.format(query_str, API_KEY)
         try:
@@ -61,21 +61,14 @@ def nearest_road_api():
             lon = float(point.get("location").get("longitude"))
             index = point.get('originalIndex')
             if index not in duplicate_indexes:
-                data['lat'][lo + index] = lat
-                data['lon'][lo + index] = lon
+                print(lo, index, lo + index, len(locs))
+                locations[lo + index].snapped_lat = lat
+                locations[lo + index].snapped_lon = lon
+                locations[lo + index].save()
         cnt += 1
         sleep(0.2)
         # break
 
-nearest_road_api()
-print(data.head())
 
-NEAREST_ROAD_KMEANS_CSV_FILE_PATH = "../media/data/nearrest_road_kmeans.csv"
-header_row_list = ['grid_id', 'direction']
-data[header_row_list] = data[header_row_list].astype(int)
-data.to_csv(NEAREST_ROAD_KMEANS_CSV_FILE_PATH, index=False)
-
-NEARREST_ROAD_KMEANS_JS_DATA_FILE_PATH = "../media/data/nearrest_road_kmeans.js"
-
-from helper import from_csv_to_js
-from_csv_to_js(NEAREST_ROAD_KMEANS_CSV_FILE_PATH, NEARREST_ROAD_KMEANS_JS_DATA_FILE_PATH)
+def run():
+    nearest_road_api()

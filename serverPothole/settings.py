@@ -145,7 +145,8 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny'
-    ]
+    ],
+    'PAGE_SIZE': 10
 }
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
