@@ -18,7 +18,9 @@ class User(models.Model):
     email = models.EmailField()
 
     def __str__(self):
-        return "email : {}".format(self.email)
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "pk:{}|{}".format(self.id, output)
 
 
 class Ride(models.Model):
@@ -36,7 +38,7 @@ class Ride(models.Model):
         # this gives you a list of dicts
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
-        return "{}".format(output)
+        return "pk:{}|{}".format(self.id, output)
 
 
 class Distance(models.Model):
@@ -47,7 +49,7 @@ class Distance(models.Model):
     def __str__(self):
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
-        return "{}".format(output)
+        return "pk:{}|{}".format(self.id, output)
 
 
 class Location(models.Model):
@@ -66,7 +68,7 @@ class Location(models.Model):
         # this gives you a list of dicts
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
-        return "{}".format(output)
+        return "pk:{}|{}".format(self.id, output)
 
 
 class Grid(models.Model):
@@ -76,7 +78,7 @@ class Grid(models.Model):
     def __str__(self):
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
-        return "{}".format(output)
+        return "pk: {}|{}".format(self.id, output)
 
 
 class PotholeCluster(models.Model):
@@ -100,7 +102,7 @@ class PotholeCluster(models.Model):
     def __str__(self):
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
-        return "{}".format(output)
+        return "pk = {}|{}".format(self.id, output)
 
     def get_bearing(self):
         if self.bearing != -1:
@@ -146,4 +148,4 @@ class Pothole(models.Model):
     def __str__(self):
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
-        return "{}".format(output)
+        return "pk : {}|{}".format(self.id, output)
