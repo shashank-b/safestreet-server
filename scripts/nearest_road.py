@@ -61,7 +61,7 @@ def nearest_road_api():
             lon = float(point.get("location").get("longitude"))
             index = point.get('originalIndex')
             if index not in duplicate_indexes:
-                print(lo, index, lo + index, len(locs))
+                # print(lo, index, lo + index, len(locs))
                 locations[lo + index].snapped_lat = lat
                 locations[lo + index].snapped_lon = lon
                 locations[lo + index].save()
