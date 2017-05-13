@@ -28,7 +28,12 @@ def run():
                 # p1.location.bearing = (p1.location.bearing + p2.location.bearing) / 2
                 # p1.location.speed = (p1.location.speed + p2.location.speed) / 2
                 bearing_diff = p1.location.bearing - p2.location.bearing
-                if dist >= 20:
+                if bearing_diff > 300:
+                    bmin = min(p1.location.bearing, p2.location.bearing)
+                    bmax = max(p1.location.bearing, p2.location.bearing)
+                    bmin += 360
+                    bearing_diff = bmin - bmax
+                if bearing_diff >= 10:
                     print("==================")
                     print(p1)
                     print(p2)
@@ -37,4 +42,4 @@ def run():
                     print("distance = {}".format(dist))
                     print("bearing diff = {}".format(bearing_diff))
                     print("==================")
-                # phs[i + 1].delete()
+                    # phs[i + 1].delete()
