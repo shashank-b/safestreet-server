@@ -1,3 +1,6 @@
+import json
+
+from django.core.serializers import serialize
 from django.db import models
 
 
@@ -14,8 +17,8 @@ class Constants(object):
 class User(models.Model):
     email = models.EmailField()
 
-    def __unicode__(self):
-        return "{0}".format(self.email)
+    def __str__(self):
+        return "email : {}".format(self.email)
 
 
 class Ride(models.Model):
@@ -25,14 +28,26 @@ class Ride(models.Model):
     acc_log = models.FileField(upload_to='uploads')
     is_processed = models.BooleanField(default=False)
 
+    # def __str__(self):
+    #     return "user: \n{}\n {}\ngps_log = {}\nacc_log = {}\nis_processed = {}".format(self.rider, self.gps_log,
+    #                                                                                self.acc_log, self.is_processed)
+
+    def __str__(self):
+        # this gives you a list of dicts
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "{}".format(output)
+
 
 class Distance(models.Model):
     user = models.ForeignKey(User)
     distance = models.FloatField(default=0)
     date = models.DateField()
 
-    def __unicode__(self):
-        return "email: {0} date: {1} distance: {2}".format(self.user.email, self.date, self.distance)
+    def __str__(self):
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "{}".format(output)
 
 
 class Location(models.Model):
@@ -47,10 +62,21 @@ class Location(models.Model):
     # in degree
     bearing = models.FloatField(default=-1)
 
+    def __str__(self):
+        # this gives you a list of dicts
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "{}".format(output)
+
 
 class Grid(models.Model):
     row = models.IntegerField(default=0)
     col = models.IntegerField(default=0)
+
+    def __str__(self):
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "{}".format(output)
 
 
 class PotholeCluster(models.Model):
@@ -70,6 +96,11 @@ class PotholeCluster(models.Model):
         null=True,
         blank=True
     )
+
+    def __str__(self):
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "{}".format(output)
 
     def get_bearing(self):
         if self.bearing != -1:
@@ -111,3 +142,8 @@ class Pothole(models.Model):
     sd = models.FloatField(default=-1)
     max_min = models.FloatField(default=-1)
     intensity = models.FloatField(default=-100)
+
+    def __str__(self):
+        raw_data = serialize('python', [self])
+        output = json.dumps(raw_data[0]['fields'])
+        return "{}".format(output)
