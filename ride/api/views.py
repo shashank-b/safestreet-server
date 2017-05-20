@@ -61,7 +61,7 @@ def list_pothole_cluster(request):
         else:
             return JsonResponse({'error': "no object found with grid id row={}, col={}".format(row, col)})
     else:
-        query_set = PotholeCluster.objects.all()
+        query_set = PotholeCluster.objects.all()[:5000]
         response_list = []
         for pc in query_set:
             d = {}
