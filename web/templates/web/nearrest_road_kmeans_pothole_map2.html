@@ -81,30 +81,16 @@
             }
             lines = [];
         }
-        function initialize() {
-            var center = new google.maps.LatLng(19.0760, 72.8777);
-
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 17,
-                center: center,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                scaleControl: true
-            });
-            infoWin = new google.maps.InfoWindow();
-            var options = {
-                imagePath: '{% static "web/js/markerclusterer/images/m" %}',
-                maxZoom: 17
-            };
-            var markers = [];
-            markerCluster = new MarkerClusterer(map, markers, options);
+        var totalMarkers = 0;
+        function get_potholeclusters(i) {
 
             var styleIconClass = new StyledIcon(
                 StyledIconTypes.CLASS, {color: "#00bfff"}
             );
 
-
-            $.get("/api/clusters", function (clusters) {
-                markers = clusters.map(function (elem, index) {
+            $.get("/api/clusters?range="+i, function (clusters) {
+                console.log(i, clusters)
+                var markers = clusters.map(function (elem, index) {
                     var latLng = new google.maps.LatLng(
                         elem.center_lat, elem.center_lon
                     );
@@ -134,11 +120,37 @@
                     return marker;
                 });
 
-                $("h2").text("Pothole counter after clustering(kmeans)" + markers.length)
+                totalMarkers += markers.length;
+                $("h2").text("Pothole counter after clustering(kmeans)" + totalMarkers)
                 markerCluster.addMarkers(markers, true);
             });
+        }
+        function initialize() {
+            var center = new google.maps.LatLng(19.0760, 72.8777);
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 17,
+                center: center,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                scaleControl: true
+            });
+            infoWin = new google.maps.InfoWindow();
+            var options = {
+                imagePath: '{% static "web/js/markerclusterer/images/m" %}',
+                maxZoom: 17
+            };
+            var markers = [];
+            markerCluster = new MarkerClusterer(map, markers, options);
 
 
+
+            $.get('/api/clusters?count',function (data) {
+                console.log(data);
+                var n = data[0].count;
+                for(var i = 0; i <= Math.floor(n/1000); i++) {
+                    get_potholeclusters(i);
+                }
+            });
             plotHorizontalLines();
             plotVerticalLines();
         }

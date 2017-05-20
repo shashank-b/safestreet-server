@@ -30,6 +30,9 @@ def list_pothole_cluster(request):
     row = request.GET.get('r')
     col = request.GET.get('c')
     grid_id = request.GET.get('gid')
+    if 'count' in request.GET:
+        count = PotholeCluster.objects.count()
+        return JsonResponse([{'count': count}], safe=False)
     if grid_id is not None:
         grid_id = int(grid_id)
         pcs = PotholeCluster.objects.filter(grid_id=grid_id)
@@ -60,8 +63,9 @@ def list_pothole_cluster(request):
             return JsonResponse(list(pothole_cluster_list), safe=False)
         else:
             return JsonResponse({'error': "no object found with grid id row={}, col={}".format(row, col)})
-    else:
-        query_set = PotholeCluster.objects.all()[:5000]
+    if 'range' in request.GET:
+        i = int(request.GET.get('range'))
+        query_set = PotholeCluster.objects.all()[1000*i:1000*(i+1)]
         response_list = []
         for pc in query_set:
             d = {}
