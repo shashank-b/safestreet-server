@@ -304,8 +304,8 @@ def reorient():
     acc_rows1 = []
     acc_rows2 = []
     acc_rows3 = []
-    pallc = []
-    hz50 = False
+    # pallc = []
+    hz50 = True
     while j < n:
         print("=============")
         trip = trips[j]
@@ -352,9 +352,9 @@ def reorient():
             phs = trip.pothole_set.all()
             for ph in phs:
                 get_intensity(acc_rows, ph, trip)
-                pallc.append(ph)
-                print(ph)
-                # ph.save()
+                # pallc.append(ph)
+                # print(ph)
+                ph.save()
         else:
             print("len of acc_rows is zero")
         acc_rows1 = acc_rows2
@@ -363,19 +363,19 @@ def reorient():
         trips[j].acc_log.close()
         j += 1
 
-    not_changed = 0
-    changed = 0
-    total = 0
-    fw = open("logs/50hzVs10hz_10.csv", "w")
-    print("id,sd2,m2", file=fw)
-    for p1 in pallc:
-        # p2 = Pothole.objects.get(pk=p1.id)
-        if p1.sd != -1:
-            total += 1
-            # if p1.sd != p2.sd or p1.max_min != p2.max_min:
-            print("{},{:.2f},{:.2f}".format(p1.id, p1.sd, p1.max_min), file=fw)
-            # changed += 1
-            # else:
-            #     not_changed += 1
-    print("total = {}, changed = {}, not_changed = {}".format(total, changed, not_changed))
-    fw.close()
+        # not_changed = 0
+        # changed = 0
+        # total = 0
+        # fw = open("logs/50hzVs10hz_10.csv", "w")
+        # print("id,sd2,m2", file=fw)
+        # for p1 in pallc:
+        #     # p2 = Pothole.objects.get(pk=p1.id)
+        #     if p1.sd != -1:
+        #         total += 1
+        #         # if p1.sd != p2.sd or p1.max_min != p2.max_min:
+        #         print("{},{:.2f},{:.2f}".format(p1.id, p1.sd, p1.max_min), file=fw)
+        #         # changed += 1
+        #         # else:
+        #         #     not_changed += 1
+        # print("total = {}, changed = {}, not_changed = {}".format(total, changed, not_changed))
+        # fw.close()
