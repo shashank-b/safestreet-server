@@ -1,0 +1,149 @@
+{% extends 'web/base.html' %}
+{% load staticfiles %}
+
+{% block data %}
+{% endblock %}
+
+{% block draw_map %}
+    <script type="text/javascript">
+        var map;
+        var infoWin;
+        var markerCluster;
+        var Constants = {
+            anchor_lat: 9.09023,
+            anchor_lon: 72.786138,
+            incr_lat: 0.001,
+            incr_lon: 0.001
+        };
+
+        var lineSymbol = {
+            path: 'M 0,-1 0,1',
+            strokeOpacity: 1,
+            scale: 4
+        };
+        function plotHorizontalLines() {
+            for (var i = 0; i < 15000; i++) {
+                var y = Constants.anchor_lat + i * Constants.incr_lat;
+                var path = [
+                    {
+                        lat: y,
+                        lng: Constants.anchor_lon - 1
+                    },
+                    {
+                        lat: y,
+                        lng: Constants.anchor_lon + 2
+                    }
+                ];
+                var line = new google.maps.Polyline({
+                    path: path,
+                    strokeOpacity: 0,
+                    icons: [{
+                        icon: lineSymbol,
+                        offset: '0',
+                        repeat: '20px'
+                    }],
+                    map: map
+                });
+            }
+        }
+        function plotVerticalLines() {
+
+            for (var i = 0; i < 1000; i++) {
+                var x = Constants.anchor_lon + i * Constants.incr_lon;
+                var path = [
+                    {
+                        lat: Constants.anchor_lat ,
+                        lng: x
+                    },
+                    {
+                        lat: Constants.anchor_lat + 12,
+                        lng: x
+                    }
+                ];
+                var line = new google.maps.Polyline({
+                    path: path,
+                    strokeOpacity: 0,
+                    icons: [{
+                        icon: lineSymbol,
+                        offset: '0',
+                        repeat: '20px'
+                    }],
+                    map: map
+                });
+            }
+        }
+        function initialize() {
+            var center = new google.maps.LatLng(19.0760, 72.8777);
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: center,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                scaleControl: true,
+            });
+            infoWin = new google.maps.InfoWindow();
+            var options = {
+                imagePath: '{% static "web/js/markerclusterer/images/m" %}',
+                maxZoom: 17
+            };
+            var markers = [];
+
+            var styleIconClass = new StyledIcon(
+                StyledIconTypes.CLASS, {color: "#00bfff"}
+            );
+            var url = "/api/clusters?gid={{ gid }}"
+            console.log(url)
+            var center;
+
+            $.get(url, function (potholes) {
+                markers = potholes.map(function (elem, index) {
+                    var latLng = new google.maps.LatLng(
+                        elem.lat, elem.lon
+                    );
+                    if (index == 0 ){
+                        center = latLng;
+                    }
+
+                    var direction = getDirectionText(elem.bearing);
+
+                    var marker = new StyledMarker({
+                        styleIcon: new StyledIcon(
+                            StyledIconTypes.MARKER,
+                            {text: direction},
+                            styleIconClass
+                        ),
+                        position: latLng,
+                        scale: 2
+                    });
+
+                    google.maps.event.addListener(
+                        marker, 'click', function (evt) {
+                            var content =
+                                "<b>bearing : </b>" + elem.bearing+ "<br>" +
+                                "<b>speed : </b>" + elem.speed+ "<br>" +
+                                "<b>intensity : </b>" + elem.intensity+ "<br>" +
+                                "<b>trip_id : </b>" + elem.trip_id+ "<br>";
+                            infoWin.setContent(content);
+                            infoWin.open(map, marker);
+                        });
+
+                    return marker;
+                });
+
+                $("h2").text("Pothole counter after clustering(kmeans)" + markers.length)
+
+                map.setCenter(center);
+                map.setZoom(map.getZoom() + 5);
+                markerCluster = new MarkerClusterer(map, markers, options);
+            });
+            plotHorizontalLines();
+            plotVerticalLines();
+        }
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+{% endblock %}
+
+{% block heading %}
+    <script type="text/javascript">
+    </script>
+{% endblock %}

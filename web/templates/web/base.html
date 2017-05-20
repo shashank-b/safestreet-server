@@ -93,6 +93,9 @@
 <h2></h2>
 <label for="search">Find your place</label>
 <input name="search" id="searchTextField" type="text" size="50">
+
+<label for="clear">Clear grid lines</label>
+<input type="checkbox" name="clear" value="clear"/>
 <div id="map-container">
     <div id="map">
     </div>
@@ -136,6 +139,8 @@
         });
     }
     google.maps.event.addDomListener(window, 'load', initialize);
+
+
 </script>
 </body>
 </html>

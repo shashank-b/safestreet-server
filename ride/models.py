@@ -30,6 +30,9 @@ class Ride(models.Model):
     acc_log = models.FileField(upload_to='uploads')
     is_processed = models.BooleanField(default=False)
 
+    def get_phone_serial(self):
+        return self.acc_log.name.split('.')[2]
+
     # def __str__(self):
     #     return "user: \n{}\n {}\ngps_log = {}\nacc_log = {}\nis_processed = {}".format(self.rider, self.gps_log,
     #                                                                                self.acc_log, self.is_processed)
@@ -119,6 +122,13 @@ class PotholeCluster(models.Model):
         self.bearing = sum(bearings) / len(bearings) % 360
         self.save()
         return self.bearing
+
+    def get_size(self):
+        if self.size != -1:
+            return self.size
+        self.size = len(self.pothole_set.all())
+        self.save()
+        return self.size
 
 
 class Pothole(models.Model):

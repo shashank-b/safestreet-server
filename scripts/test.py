@@ -30,6 +30,6 @@ def separate_direction(grid):
 
 from helper import from_csv_to_js
 
-from_csv_to_js("../media/data/pothole_pred.csv","../media/data/pothole_pred.js")
+from_csv_to_js("../media/data/pothole_pred1000.csv","../media/data/pothole_pred.js")
 
 

@@ -96,7 +96,7 @@ def separate_direction(list_of_potholes):
     if len(grid2) > 0 and grid2[0].location.bearing > 350:
         while len(grid1) > 0 and grid1[-1].location.bearing < 10:
             loc = grid1.pop()
-            loc.location.bearing += 360
+            # loc.location.bearing += 360
             grid2.append(loc)
     if len(grid1) == 0 and len(grid2) > 0 and grid2[0].location.bearing <= 180:
         return grid2, grid1
@@ -144,7 +144,7 @@ def save_clusters_to_db(k, list_of_potholes):
         center_lon = kmeans.cluster_centers_[label][1]
         if current_cluster_id < label:
             row = (center_lat - Constants.anchor_lat) // Constants.INCR_LAT
-            col = (center_lat - Constants.anchor_lon) // Constants.INCR_LON
+            col = (center_lon - Constants.anchor_lon) // Constants.INCR_LON
             gs = Grid.objects.filter(row=row, col=col)
             if gs.exists():
                 grid = gs[0]

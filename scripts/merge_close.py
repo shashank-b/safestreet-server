@@ -49,6 +49,7 @@ def run():
                 # print("bearing diff = {}".format(bearing_diff))
                 # p1.save()
                 print("saving p1 {}".format(p1))
+                p2.location.delete()
                 p2.delete()
                 cnt += 1
                 print("deleting p2 = {}".format(p2))

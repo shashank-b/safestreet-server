@@ -22,6 +22,10 @@ class AllComplaints(APIView):
         return render(request, 'web/complaints.html')
 
 
+def get_pothole_by_grid(request, gid):
+    return render(request, 'web/nearrest_road_kmeans_pothole_map_gid.html', {'gid': gid})
+
+
 class RawPotholeMap(TemplateView):
     template_name = 'web/intensity.html'
 
@@ -47,7 +51,7 @@ class TestMap1(TemplateView):
 
 
 class NearrestRoadMap(TemplateView):
-    template_name = 'web/nearrest_road_kmeans_pothole_map.html'
+    template_name = 'web/nearrest_road_kmeans_pothole_map2.html'
 
 
 def total_distance(distances):

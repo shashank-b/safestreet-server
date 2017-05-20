@@ -4,8 +4,9 @@ All web related links have to be served from here
 """
 from django.conf.urls import url
 
+from ride import views
 from .views import AllComplaints, RawPotholeMap, DBScanMap, DistanceView, DetailDistanceView, PrivacyPolicyView, \
-    KmeansMap, NearrestRoadMap, TestMap, TestMap1
+    KmeansMap, NearrestRoadMap, TestMap, TestMap1, get_pothole_by_grid
 
 urlpatterns = [
     url(r'^$', AllComplaints.as_view(), name='all_complaints'),
@@ -15,6 +16,7 @@ urlpatterns = [
     url(r'^plot/$', TestMap.as_view(), name='test_map'),
     url(r'^plot1/$', TestMap1.as_view(), name='test_map1'),
     url(r'^nearest_road/$', NearrestRoadMap.as_view(), name='nearrest_road_map'),
+    url(r'^nearest_road/(?P<gid>[0-9]+)/$', get_pothole_by_grid, name='get_pothole_by_grid'),
     url(r'^allComplaints$', AllComplaints.as_view(), name='all_complaints'),
     url(r'^distances/$', DistanceView.as_view(), name='distance_total'),
     url(r'^distances/(?P<id>\d+)/$', DetailDistanceView.as_view(), name='distance_details'),
