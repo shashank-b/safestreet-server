@@ -89,7 +89,7 @@
             );
 
             $.get("/api/clusters?range="+i, function (clusters) {
-                console.log(i, clusters)
+{#                console.log(i, clusters)#}
                 var markers = clusters.map(function (elem, index) {
                     var latLng = new google.maps.LatLng(
                         elem.center_lat, elem.center_lon
