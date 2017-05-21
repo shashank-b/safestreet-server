@@ -52,7 +52,8 @@ def run():
         zip_file.close()
         acc_log.close()
         count = len(Pothole.objects.filter(ride_id=ride.id))
-        print("{},{}".format(total_time / (1000 * 60), count))
+        total_time = total_time / (1000 * 60)
+        print("{},{}".format(total_time, count))
         if count > 0:
             pothole_count += count
             tmin += total_time
