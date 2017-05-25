@@ -124,11 +124,7 @@ class PotholeCluster(models.Model):
         return self.bearing
 
     def get_size(self):
-        if self.size != -1:
-            return self.size
-        self.size = len(self.pothole_set.all())
-        self.save()
-        return self.size
+        return len(self.pothole_set.all())
 
 
 class Pothole(models.Model):
