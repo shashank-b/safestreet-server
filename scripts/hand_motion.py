@@ -101,9 +101,9 @@ def reor_acc(mean_ax, mean_ay, mean_az):
         theta_x = math.atan2(math.sqrt(mean_ax * mean_ax + mean_az * mean_az), mean_ay)
 
         # Tweak used to handle data for different coordinate axes
-        if mean_az > 0:
-            theta_y = -theta_y
-            theta_x = -theta_x
+        # if mean_az > 0:
+        #     theta_y = -theta_y
+        #     theta_x = -theta_x
     return theta_x, theta_y
 
 
@@ -197,7 +197,8 @@ def get_intensity(acc_rows, ph, trip, fw):
             mean_ay = sum_ay / cnt
             mean_az = sum_az / cnt
             theta_x, theta_y = reor_acc(mean_ax, mean_ay, mean_az)
-            print("{},{:.2f},{:.2f}".format(acc_rows[start_index][0], math.degrees(theta_x), math.degrees(theta_y)), file=fw)
+            print("{},{:.2f},{:.2f}".format(acc_rows[start_index][0], math.degrees(theta_x), math.degrees(theta_y)),
+                  file=fw)
         start_index += 1
 
 
@@ -272,7 +273,7 @@ def extract_info(pc):
 
     for p in pc.pothole_set.all():
         fw = open(os.path.join(data_dir, p.event_timestamp), "w")
-        print("time,theta_x,theta_y",file=fw)
+        print("time,theta_x,theta_y", file=fw)
         reorient(p, fw)
         fw.close()
 
