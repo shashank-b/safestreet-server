@@ -155,3 +155,10 @@ class Pothole(models.Model):
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
         return "pk : {}|{}".format(self.id, output)
+
+
+class GroundTruthPotholeLocation(models.Model):
+    latitude = models.FloatField(default=0)
+    longitude = models.FloatField(default=0)
+    description = models.TextField(blank=True, null=True)
+    reported_date = models.DateField(blank=True, null=True)

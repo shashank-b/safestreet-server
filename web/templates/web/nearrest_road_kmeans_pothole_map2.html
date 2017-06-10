@@ -54,7 +54,7 @@
                 var x = Constants.anchor_lon + i * Constants.incr_lon;
                 var path = [
                     {
-                        lat: Constants.anchor_lat ,
+                        lat: Constants.anchor_lat,
                         lng: x
                     },
                     {
@@ -76,11 +76,12 @@
             }
         }
         function clearLines() {
-            for(var i =0 ; i < lines.length; i++){
+            for (var i = 0; i < lines.length; i++) {
                 lines[i].setMap(null);
             }
             lines = [];
         }
+
         var totalMarkers = 0;
         function get_potholeclusters(i) {
 
@@ -88,8 +89,8 @@
                 StyledIconTypes.CLASS, {color: "#00bfff"}
             );
 
-            $.get("/api/clusters?range="+i, function (clusters) {
-{#                console.log(i, clusters)#}
+            $.get("/api/clusters?range=" + i, function (clusters) {
+                {#                console.log(i, clusters)#}
                 var markers = clusters.map(function (elem, index) {
                     var latLng = new google.maps.LatLng(
                         elem.center_lat, elem.center_lon
@@ -110,7 +111,7 @@
                     google.maps.event.addListener(
                         marker, 'click', function (evt) {
                             var content =
-                                "<b>grid_id :</b><a href='"+elem.grid_id +"'>" + elem.grid_id +"</a>"+ "<br>" +
+                                "<b>grid_id :</b><a href='" + elem.grid_id + "'>" + elem.grid_id + "</a>" + "<br>" +
                                 "<b>size : </b>" + elem.size + "<br>" +
                                 "<b>bearing : </b>" + elem.bearing + "<br>";
                             infoWin.setContent(content);
@@ -142,17 +143,55 @@
             var markers = [];
             markerCluster = new MarkerClusterer(map, markers, options);
 
-
-
-            $.get('/api/clusters?count',function (data) {
+            $.get('/api/clusters?count', function (data) {
                 console.log(data);
                 var n = data[0].count;
-                for(var i = 0; i <= Math.floor(n/1000); i++) {
+                for (var i = 0; i <= Math.floor(n / 1000); i++) {
                     get_potholeclusters(i);
                 }
             });
             plotHorizontalLines();
             plotVerticalLines();
+        }
+
+        function showGroundTruthPotholes() {
+
+            var styleIconClass = new StyledIcon(
+                StyledIconTypes.CLASS, {color: "#CD2121"}
+            );
+
+            $.get("/api/groundtruthpotholes/", function (groundTruthPothole) {
+                {#                console.log(i, clusters)#}
+                var markers = groundTruthPothole.map(function (elem, index) {
+                    var latLng = new google.maps.LatLng(
+                        elem.latitude, elem.longitude
+                    );
+
+
+                    var marker = new StyledMarker({
+                        styleIcon: new StyledIcon(
+                            StyledIconTypes.MARKER,
+                            {text: "P"},
+                            styleIconClass
+                        ),
+                        position: latLng,
+                        scale: 2
+                    });
+
+                    google.maps.event.addListener(
+                        marker, 'click', function (evt) {
+                            var content =
+                                "<b>description : </b>" + elem.description + "<br>" +
+                                "<b>reported date : </b>" + elem.reported_date + "<br>";
+                            infoWin.setContent(content);
+                            infoWin.open(map, marker);
+                        });
+
+                    return marker;
+                });
+
+                markerCluster.addMarkers(markers, true);
+            });
         }
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
@@ -160,14 +199,24 @@
 
 {% block heading %}
     <script type="text/javascript">
-        $('input:checkbox').change(
-            function(){
+        $('input:checkbox#clear').change(
+            function () {
                 if ($(this).is(':checked')) {
                     clearLines();
-                }else{
+                } else {
                     plotHorizontalLines();
                     plotVerticalLines();
                 }
+                console.log($(this))
+            });
+        $('input:checkbox#groundtruth').change(
+            function () {
+                if ($(this).is(':checked')) {
+                    showGroundTruthPotholes();
+                } else {
+                    {#                    hideGroundTruthPotholes()#}
+                }
+                {#                console.log($(this))#}
             });
     </script>
     hello

@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework import generics
 
 from ride.api.serializers import RideSerializer
-from ride.models import Ride, User, Grid, PotholeCluster
+from ride.models import Ride, User, Grid, PotholeCluster, GroundTruthPotholeLocation
 
 
 class RideCreateView(generics.CreateAPIView):
@@ -65,7 +65,7 @@ def list_pothole_cluster(request):
             return JsonResponse({'error': "no object found with grid id row={}, col={}".format(row, col)})
     if 'range' in request.GET:
         i = int(request.GET.get('range'))
-        query_set = PotholeCluster.objects.all()[1000*i:1000*(i+1)]
+        query_set = PotholeCluster.objects.all()[1000 * i:1000 * (i + 1)]
         response_list = []
         for pc in query_set:
             d = {}
@@ -82,6 +82,11 @@ def list_potholes_by_grid_id(request):
     grid_id = request.GET.get('gid')
     if grid_id is not None:
         pass
+
+
+def list_ground_truth_potholes(request):
+    gphs = GroundTruthPotholeLocation.objects.all().values('latitude','longitude','description','reported_date')
+    return JsonResponse(list(gphs), safe=False)
 
 
 def list_potholes(request):

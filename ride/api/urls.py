@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^clusters$', views.list_pothole_cluster, name='pothole_cluster_list'),
     url(r'^potholes/$', views.list_potholes, name='pothole_list'),
     url(r'^grids/$', views.list_grids, name='grid_list'),
+    url(r'^groundtruthpotholes/$', views.list_ground_truth_potholes, name='ground_truth_potholes_list'),
 ]
 
 # urlpatterns = format_suffix_patterns(urlpatterns)
