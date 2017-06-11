@@ -72,3 +72,9 @@ def nearest_road_api():
 
 def run():
     nearest_road_api()
+    # pcs = PotholeCluster.objects.all()
+    # for pc in pcs:
+    #     if pc.snapped_lat == 0:
+    #         pc.snapped_lat = pc.center_lat
+    #         pc.snapped_lon = pc.center_lon
+    #         pc.save()

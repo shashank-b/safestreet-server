@@ -69,8 +69,8 @@ def list_pothole_cluster(request):
         response_list = []
         for pc in query_set:
             d = {}
-            d['center_lat'] = pc.center_lat
-            d['center_lon'] = pc.center_lon
+            d['center_lat'] = pc.get_snapped_or_center_lat()
+            d['center_lon'] = pc.get_snapped_or_center_lon()
             d['grid_id'] = pc.grid_id
             d['bearing'] = pc.get_bearing()
             d['size'] = pc.pothole_set.all().count()

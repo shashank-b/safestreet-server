@@ -123,6 +123,12 @@ class PotholeCluster(models.Model):
         self.save()
         return self.bearing
 
+    def get_snapped_or_center_lat(self):
+        return self.snapped_lat if self.snapped_lat != 0 else self.center_lat
+
+    def get_snapped_or_center_lon(self):
+        return self.snapped_lon if self.snapped_lon != 0 else self.center_lon
+
     def get_size(self):
         return len(self.pothole_set.all())
 
