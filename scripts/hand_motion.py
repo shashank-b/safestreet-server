@@ -267,7 +267,7 @@ def reorient(p, fw):
 
 
 def extract_info(pc):
-    data_dir = os.path.join("data3", str(pc.id))
+    data_dir = os.path.join("data5", str(pc.id))
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -281,9 +281,9 @@ def extract_info(pc):
 def run():
     pcs = PotholeCluster.objects.all()
     for pc in pcs:
-        lat = pc.center_lat
-        lon = pc.center_lon
-        in_lat = min_lat <= lat <= max_lat
-        in_lon = min_lon <= lon <= max_lon
-        if in_lat and in_lon:
-            extract_info(pc)
+        # lat = pc.center_lat
+        # lon = pc.center_lon
+        # in_lat = min_lat <= lat <= max_lat
+        # in_lon = min_lon <= lon <= max_lon
+        # if in_lat and in_lon:
+        extract_info(pc)
