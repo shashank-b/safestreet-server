@@ -132,6 +132,17 @@ class PotholeCluster(models.Model):
     def get_size(self):
         return len(self.pothole_set.all())
 
+    def get_avg_intensity(self):
+        sint = 0
+        cnt = 0
+        for p in self.pothole_set.all():
+            if p.intensity > 0:
+                sint += p.intensity
+                cnt += 1
+        if cnt > 0:
+            return sint / cnt
+        return -100
+
 
 class Pothole(models.Model):
     ride = models.ForeignKey(
