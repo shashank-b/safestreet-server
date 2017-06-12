@@ -206,7 +206,7 @@ def get_intensity(acc_rows, ph, trip):
         # print("racc = {}".format(sacc.az))
         eq.append(sacc)
         if (eq[-1].time - eq[0].time) >= 1000:
-            sd_tmp, max_min_tmp = sd_and_max_min(eq)
+            max_min_tmp,sd_tmp = sd_and_max_min(eq)
             if max_min_tmp > max_min:
                 # print("setting sd to {}".format(sd))
                 sd = sd_tmp
@@ -223,11 +223,7 @@ def get_intensity(acc_rows, ph, trip):
     return G.SUCCESS
 
 
-clf = None
-
-
 def load_model():
-    global clf
     x = []
     y = []
     for l in open('staticfiles/model/data-smooth.csv'):
@@ -239,6 +235,7 @@ def load_model():
               kernel='linear', max_iter=-1, probability=True, random_state=None,
               shrinking=True, tol=0.001, verbose=False)
     clf.fit(x, y)
+    return clf
 
 
 def get_acc_rows(acc_log, hz50=True):
@@ -276,8 +273,8 @@ def get_acc_rows(acc_log, hz50=True):
                             print(ex)
                             continue
                         # print(time, ax, ay, az)
-                        if hz50 or cnt % 5 == 0:
-                            acc_rows.append((time, ax, ay, az))
+                        # if hz50 or cnt % 5 == 0:
+                        acc_rows.append((time, ax, ay, az))
                         cnt += 1
                 # print(pothole_timestamps)
                 # print(timestamps)
@@ -299,6 +296,7 @@ def is_sorted(lst):
 
 def reorient():
     trips = Ride.objects.all().order_by('acc_log')
+    clf = load_model()
     j = 0
     n = len(trips)
     acc_rows1 = []
@@ -352,6 +350,7 @@ def reorient():
             phs = trip.pothole_set.all()
             for ph in phs:
                 get_intensity(acc_rows, ph, trip)
+                ph.intensity = clf.predict_proba([(ph.max_min, ph.sd)])[0][1]
                 # pallc.append(ph)
                 # print(ph)
                 ph.save()
