@@ -36,6 +36,7 @@ def load_model():
               shrinking=True, tol=0.001, verbose=False)
     clf.fit(x, y)
     return clf
+
 clf = load_model()
 # g1, g2 = separate_direction([360, 359, 355, 182, 181, 180, 1])
 # print(g1)

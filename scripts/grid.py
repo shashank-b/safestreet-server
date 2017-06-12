@@ -170,7 +170,7 @@ def save_clusters_to_db(k, list_of_potholes):
 
 
 def run():
-    potholes = Pothole.objects.all()
+    potholes = Pothole.objects.filter(intensity__gt=0)
     for pothole in potholes:
         lat = pothole.location.lattitude
         lon = pothole.location.longitude
