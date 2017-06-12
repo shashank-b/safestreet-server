@@ -45,6 +45,7 @@ def nearest_road_api():
             print("received response ", file=sys.stderr)
         except Exception as e:
             print("error occured at count " + str(cnt), file=sys.stderr)
+            print(e)
             continue
         point_list = response.get("snappedPoints")
         duplicate_indexes = set()
