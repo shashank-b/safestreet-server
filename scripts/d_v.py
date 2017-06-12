@@ -90,9 +90,9 @@ def plot_graphs():
 
             coeff = correlation(speed, intensities)
             if coeff > 0.7 and len(intensities) > 10:
-                print(pc.id, coeff, size)
                 plot_cluster(speed, intensities, axes=axes[(cnt % total) // rows, (cnt % total) % cols], coeff=coeff)
                 cnt += 1
+                print(pc.id, coeff, size,cnt)
                 if (cnt % total) == 0:
                     print("saving fig")
                     plt.savefig(str(cnt) + ".eps")
