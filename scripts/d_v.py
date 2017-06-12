@@ -20,6 +20,8 @@ def plot_cluster(speed, intensity, axes, coeff):
 
 
 def correlation(speed, intensities):
+    if len(speed) <= 1:
+        return 0
     speed_array = np.array(speed)
     intensity_array = np.array(intensities)
     speed_mean = speed_array.mean()
@@ -86,8 +88,8 @@ def plot_graphs():
                     speed.append(p.location.speed)
                     intensities.append(p.intensity)
 
-            if len(intensities) > 10:
-                coeff = correlation(speed, intensities)
+            coeff = correlation(speed, intensities)
+            if coeff > 0.7 and len(intensities) > 10:
                 print(pc.id, coeff, size)
                 plot_cluster(speed, intensities, axes=axes[(cnt % total) // rows, (cnt % total) % cols], coeff=coeff)
                 cnt += 1
