@@ -71,12 +71,12 @@ def get_new_fig(cnt, rows, cols):
 
 
 def plot_graphs():
-    cnt = 0
+    count = 0
     rows = 3
     cols = 3
     total = rows * cols
 
-    axes = get_new_fig(cnt, rows, cols)
+    axes = get_new_fig(count, rows, cols)
     for pc in PotholeCluster.objects.all():
         size = len(pc.pothole_set.all())
         if size > 5:
@@ -88,21 +88,20 @@ def plot_graphs():
                     intensities.append(p.intensity)
 
             coeff = correlation(speed, intensities)
-            if coeff > 0.7 and len(intensities) > 10:
-                plot_cluster(speed, intensities, axes=axes[(cnt % total) // rows, (cnt % total) % cols], coeff=coeff)
-                cnt += 1
-                print(pc.id, coeff, size, cnt)
-                if (cnt % total) == 0:
+            if coeff > 0.0 and len(intensities) > 10:
+                print(count)
+                plot_cluster(speed, intensities, axes=axes[(count % total) // rows, (count % total) % cols], coeff=coeff)
+                count += 1
+                print(pc.id, coeff, size, count)
+                if (count % total) == 0:
                     print("saving fig")
-                    plt.savefig(str(cnt) + ".eps")
+                    print(count)
+                    plt.savefig(str(count) + ".eps")
                     # plt.close()
-                    axes = get_new_fig(cnt, rows, cols)
+                    axes = get_new_fig(count, rows, cols)
 
-    plt.savefig(str(cnt) + ".eps")
+    plt.savefig(str(count) + ".eps")
 
 
 def run():
     plot_graphs()
-
-
-run()
