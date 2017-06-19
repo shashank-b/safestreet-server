@@ -10,7 +10,7 @@ from core.utils import CITIES
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, name, city, phone, password=None):
+    def create_user(self, email, name, password=None):
         """
         Creates and saves a User with the given Email, Name, city, phone
         """
@@ -20,23 +20,20 @@ class MyUserManager(BaseUserManager):
         user = self.model(
             email=MyUserManager.normalize_email(email),
             name=name,
-            city=city,
-            Phone=phone,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, city, phone, password):
+    def create_superuser(self, email, name, password):
         """
         Creates and saves a superuser with the given email, name, city, phone and password
         """
-        print(("dd", email, name, city, phone, password))
+        # print(("dd", email, name, city, phone, password))
+        # print(("dd", email, name, password))
         u = self.create_user(email=email,
                              name=name,
-                             city=city,
-                             phone=phone,
                              password=password,
                              )
         u.is_admin = True
@@ -51,8 +48,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=50)
     address = models.CharField(max_length=200, null=True, blank=True)
     home_location = models.PointField(srid=4326, null=True, blank=True)
-    city = models.CharField(max_length=3, choices=CITIES)
-    phone = models.CharField(
+    city = models.CharField(max_length=3, choices=CITIES, blank=True,null=True)
+    phone = models.CharField(null=True,blank=True,
         validators=[RegexValidator(r'^\d{10}$', message="Phone number must be 10 digits")],
         max_length=10)
     email = models.EmailField(unique=True)
@@ -65,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'city', 'phone']
+    REQUIRED_FIELDS = ['name', ]
 
     def get_full_name(self):
         # The user is identified by their email address

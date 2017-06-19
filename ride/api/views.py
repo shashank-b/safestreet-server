@@ -1,5 +1,7 @@
 from django.http import JsonResponse
 from rest_framework import generics
+from rest_framework.decorators import permission_classes, api_view
+from rest_framework.permissions import IsAuthenticated
 
 from ride.api.serializers import RideSerializer
 from ride.models import Ride, User, Grid, PotholeCluster, GroundTruthPotholeLocation
@@ -26,6 +28,62 @@ def get_row_col(grid_id):
     return row, col
 
 
+# @api_view(['GET'])
+# @permission_classes((IsAuthenticated,))
+# def list_pothole_cluster_by_ola(request):
+#     row = request.GET.get('r')
+#     col = request.GET.get('c')
+#     grid_id = request.GET.get('gid')
+#     if 'count' in request.GET:
+#         count = PotholeCluster.objects.count()
+#         return JsonResponse([{'count': count}], safe=False)
+#     if grid_id is not None:
+#         grid_id = int(grid_id)
+#         pcs = PotholeCluster.objects.filter(grid_id=grid_id,pothole__ride__rider=None).distinct()
+#         response_list = []
+#         for pc in pcs:
+#             potholes = pc.pothole_set.all()
+#             for pothole in potholes:
+#                 d = {
+#                     'bearing': pothole.location.bearing,
+#                     'lat': pothole.location.lattitude,
+#                     'lon': pothole.location.longitude,
+#                     'intensity': pothole.intensity,
+#                     'speed': pothole.location.speed,
+#                     'max_min': pothole.max_min,
+#                     'trip_id': pothole.ride_id
+#                 }
+#                 response_list.append(d)
+#         return JsonResponse(response_list, safe=False)
+#
+#     if row is not None and col is not None:
+#         row = int(row)
+#         col = int(col)
+#         grid = Grid.objects.filter(row=row, col=col)
+#         if grid.exists():
+#             pothole_cluster_list = grid[0].potholecluster_set.all().filter(pothole__ride__rider=None).distinct().values(
+#                 'id', 'center_lat', 'center_lon', 'snapped_lat', 'snapped_lon', 'bearing', 'speed', 'accuracy'
+#             )
+#             return JsonResponse(list(pothole_cluster_list), safe=False)
+#         else:
+#             return JsonResponse({'error': "no object found with grid id row={}, col={}".format(row, col)})
+#     if 'range' in request.GET:
+#         i = int(request.GET.get('range'))
+#         query_set = PotholeCluster.objects.filter(pothole__ride__rider=None).distinct()[1000 * i:1000 * (i + 1)]
+#         response_list = []
+#         for pc in query_set:
+#             d = {}
+#             d['center_lat'] = pc.get_snapped_or_center_lat()
+#             d['center_lon'] = pc.get_snapped_or_center_lon()
+#             d['grid_id'] = pc.grid_id
+#             d['bearing'] = pc.get_bearing()
+#             d['size'] = pc.pothole_set.all().count()
+#             response_list.append(d)
+#     return JsonResponse(response_list, safe=False)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
 def list_pothole_cluster(request):
     row = request.GET.get('r')
     col = request.GET.get('c')
@@ -35,7 +93,7 @@ def list_pothole_cluster(request):
         return JsonResponse([{'count': count}], safe=False)
     if grid_id is not None:
         grid_id = int(grid_id)
-        pcs = PotholeCluster.objects.filter(grid_id=grid_id)
+        pcs = PotholeCluster.objects.filter(grid_id=grid_id).distinct()
         response_list = []
         for pc in pcs:
             potholes = pc.pothole_set.all()
@@ -85,7 +143,7 @@ def list_potholes_by_grid_id(request):
 
 
 def list_ground_truth_potholes(request):
-    gphs = GroundTruthPotholeLocation.objects.all().values('latitude','longitude','description','reported_date')
+    gphs = GroundTruthPotholeLocation.objects.all().values('latitude', 'longitude', 'description', 'reported_date')
     return JsonResponse(list(gphs), safe=False)
 
 

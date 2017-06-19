@@ -350,7 +350,7 @@ def reorient():
             phs = trip.pothole_set.all()
             for ph in phs:
                 get_intensity(acc_rows, ph, trip)
-                ph.intensity = clf.decision_function_shape([(ph.max_min, ph.sd)])[0]
+                ph.intensity = clf.decision_function([(ph.max_min, ph.sd)])[0]
                 # pallc.append(ph)
                 # print(ph)
                 ph.save()

@@ -14,6 +14,15 @@ class Constants(object):
     anchor_lon = 72.786138
 
 
+class Phone(models.Model):
+    name = models.CharField(max_length=80, blank=True, null=True)
+    serial = models.CharField(max_length=40, blank=True, null=True)
+
+
+class App(models.Model):
+    version = models.CharField(max_length=20, blank=True, null=True)
+
+
 class User(models.Model):
     email = models.EmailField()
 
@@ -22,16 +31,40 @@ class User(models.Model):
         output = json.dumps(raw_data[0]['fields'])
         return "pk:{}|{}".format(self.id, output)
 
-
 class Ride(models.Model):
     rider = models.ForeignKey(User, related_name='rider', blank=True, null=True)
     # file = models.FileField(upload_to='uploads')
-    gps_log = models.FileField(upload_to='uploads')
+    gps_log = models.FileField(upload_to='uploads', blank=True, null=True)
     acc_log = models.FileField(upload_to='uploads')
+
+    phone = models.ForeignKey(
+        Phone,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    app_version = models.ForeignKey(
+        App,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     is_processed = models.BooleanField(default=False)
 
     def get_phone_serial(self):
+        parts = self.acc_log.name.split('.')
+        if len(parts) == 9:
+            return self.acc_log.name.split('.')[3]
         return self.acc_log.name.split('.')[2]
+
+    def get_app_version(self):
+        parts = self.acc_log.name.split('.')
+        if len(parts) == 5:
+            return "0.0.0"
+        if len(parts) == 9:
+            return ".".join(parts[5:-1])
+        else:
+            return ".".join(parts[4:-1])
 
     # def __str__(self):
     #     return "user: \n{}\n {}\ngps_log = {}\nacc_log = {}\nis_processed = {}".format(self.rider, self.gps_log,
