@@ -4,7 +4,7 @@ import os
 from ride.models import Ride, App, Phone
 from serverPothole.settings import MEDIA_ROOT
 
-BASE_DIRECTORY = "/home/vikrant/Downloads/data"
+# BASE_DIRECTORY = "/home/vikrant/Downloads/data"
 
 
 def get_time_stamp_acc_and_gps_data(event):
@@ -29,6 +29,8 @@ def get_new_files(phone_identity, app_version, time):
     a_filename = ".".join(["acc.car", phone_identity, time, app_version, "txt"])
     g_filename = ".".join(["gps.car", phone_identity, time, app_version, "txt"])
     # print(a_filename,g_filename)
+    if not os.path.exists(MEDIA_ROOT):
+        os.makedirs(os.path.join(MEDIA_ROOT,"uploads"))
     a_file = open(os.path.join(MEDIA_ROOT, "uploads", a_filename), "w")
     g_file = open(os.path.join(MEDIA_ROOT, "uploads", g_filename), "w")
     r = Ride()
@@ -52,20 +54,20 @@ def get_new_files(phone_identity, app_version, time):
         phone.save()
         r.phone = phone
     r.save()
-    print("ride_id {} phone_id {} app_version {}".format(r.id,r.phone_id,r.app_version_id))
+    print("ride_id {} phone_id {} app_version {}".format(r.id, r.phone_id, r.app_version_id))
     print("time,ax,ay,az,reaz,event_flag", file=a_file)
     print("time,lat,lon,accuracy,speed,bearing,near_pothole,sd,max_min,gps_time", file=g_file)
     return a_file, g_file
 
 
 def run():
-    with open("/home/vikrant/Downloads/data.csv", "r") as f:
+    with open("scripts/data.csv", "r") as f:
         reader = csv.DictReader(f)
         data = []
         for line in reader:
             data.append(line['payload'])
-        if not os.path.exists(BASE_DIRECTORY):
-            os.makedirs(BASE_DIRECTORY)
+        # if not os.path.exists(BASE_DIRECTORY):
+        #     os.makedirs(BASE_DIRECTORY)
         acc_gps_dict = {}
         for row in data:
             event = row.strip("[]").split(";")
