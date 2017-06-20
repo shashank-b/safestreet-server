@@ -18,9 +18,15 @@ class Phone(models.Model):
     name = models.CharField(max_length=80, blank=True, null=True)
     serial = models.CharField(max_length=40, blank=True, null=True)
 
+    def __str__(self):
+        return "{},{}".format(self.name, self.serial)
+
 
 class App(models.Model):
     version = models.CharField(max_length=20, blank=True, null=True)
+
+    def __str__(self):
+        return "{}".format(self.version)
 
 
 class User(models.Model):
@@ -30,6 +36,7 @@ class User(models.Model):
         raw_data = serialize('python', [self])
         output = json.dumps(raw_data[0]['fields'])
         return "pk:{}|{}".format(self.id, output)
+
 
 class Ride(models.Model):
     rider = models.ForeignKey(User, related_name='rider', blank=True, null=True)
@@ -212,3 +219,8 @@ class GroundTruthPotholeLocation(models.Model):
     longitude = models.FloatField(default=0)
     description = models.TextField(blank=True, null=True)
     reported_date = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return "lat:{}, lon:{}, desc:{}, date:{}".format(self.latitude, self.longitude, self.description,
+                                                         self.reported_date)
+   
