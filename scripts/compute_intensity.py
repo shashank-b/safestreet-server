@@ -1,6 +1,6 @@
 from sklearn.svm import SVC
 
-from ride.models import Pothole
+from ride.models import Pothole, Constants
 
 
 def load_model():
@@ -20,7 +20,7 @@ def load_model():
 
 def run():
     clf = load_model()
-    potholes = Pothole.objects.filter(ride__rider=None)
+    potholes = Pothole.objects.filter(intensity__exact=Constants.null_intensity)
     # print(len(potholes))
     for p in potholes:
         p.intensity = clf.decision_function([(p.max_min, p.sd)])

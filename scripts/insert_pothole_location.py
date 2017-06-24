@@ -43,8 +43,9 @@ def get_nearest_loc(gps_list, gps_index, time):
 
 
 def run():
-    rides = Ride.objects.filter(rider=None)
+    rides = Ride.objects.filter(is_processed=False)
     for ride in rides:
+        print(ride.id)
         # ride.gps_log.open("r")
         gps_text = ride.gps_log.read().decode("utf-8")
         acc_text = ride.acc_log.read().decode("utf-8")
@@ -61,7 +62,8 @@ def run():
         for line in gps_reader:
             gps_list.append((int(line.get('time')), float(line.get('lat')), float(line.get('lon')),
                              float(line.get('speed')), float(line.get('bearing')), float(line.get('accuracy'))))
-        # print(reor_acc)
+        ride.gps_log.close()
+        ride.acc_log.close()
 
         prev_time = None
         s = 0
@@ -72,7 +74,6 @@ def run():
             cur_time = az[0]
             if prev_time is None:
                 prev_time = cur_time
-            # print(cur_time - prev_time)
             prev_time = cur_time
             while abs(smooth_acc[-1][0] - smooth_acc[0][0]) >= 500:
                 s -= smooth_acc.popleft()[1]
@@ -85,14 +86,11 @@ def run():
 
             if az[2] == "e":
                 max_min, sd = sd_and_max_min(event_win)
-                # print("time = {}, mm = {:.2f}, sd = {:.2f}".format(az[0] / 1000, max_min, sd))
                 events.append((az[0], max_min, sd, "e"))
             else:
                 max_min, sd = sd_and_max_min(event_win)
                 if max_min >= 2 or sd >= math.sqrt(.2):
                     events.append((az[0], max_min, sd, "o"))
-                    # print("time = {}, mm = {:.2f}, sd = {:.2f}*".format(az[0] / 1000, max_min, sd))
-        # events.sort()
         i = 0
         n = len(events)
 
@@ -121,6 +119,8 @@ def run():
                             time = ttime
                             max_min = tmax_min
                             sd = tsd
+                if sd == 0 and j < n:
+                    print(ride.acc_log,events[i], events[j])
                 gps_index = bisect(gps_list, (time, 0, 0, 0))
                 if 0 <= gps_index < len(gps_list):
                     g_index = get_nearest_loc(gps_list, gps_index, time)
@@ -146,40 +146,8 @@ def run():
                         loc.save()
                         p.location = loc
                         p.save()
-
-                        # print(
-                        #     "atime = {} gtime = {} diff = {} max-min = {:.2f} sd = {:.2f} lat = {} lon = {} speed = {"
-                        #     "}".format(
-                        #         time,
-                        #         gtime,
-                        #         time_diff,
-                        #         max_min,
-                        #         sd,
-                        #         lat,
-                        #         lon,
-                        #         speed)
-                        # )
+                        # print(p.event_timestamp,p.sd, p.max_min)
 
             i += 1
-            # if len(e) == 4 and e[3] == "y":
-            #     print("gtime = {}, mm = {:.2f}, sd = {:.2f}".format(e[0], e[1], e[2]))
-            # elif len(e) == 4 and e[3] == "o":
-            #     print("otime = {}, mm = {:.2f}, sd = {:.2f}".format(e[0], e[1], e[2]))
-            # else:
-            #     print("xtime = {}, mm = {:.2f}, sd = {:.2f}".format(e[0], e[1], e[2]))
-
-
-
-
-            # print(event_win)
-
-            # else:
-            #     print(az[0])
-            # if line.get('event_flag') =="e":
-            #     print(line)
-            # for line in gps_reader:
-            #     if line.get("near_pothole")=="y":
-            #         print(line)
-
-
-            # ride.gps_log.close()
+        ride.is_processed = True
+        ride.save()

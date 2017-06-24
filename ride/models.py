@@ -12,6 +12,9 @@ from django.db import models
 class Constants(object):
     anchor_lat = 9.09023
     anchor_lon = 72.786138
+    null_intensity = -100
+    null_lat = null_lon = 0
+    null_sd = null_max_min = null_speed = null_accuracy = null_bearing = -1
 
 
 class Phone(models.Model):
@@ -96,16 +99,16 @@ class Distance(models.Model):
 
 
 class Location(models.Model):
-    lattitude = models.FloatField(default=0)
-    longitude = models.FloatField(default=0)
-    snapped_lat = models.FloatField(default=0)
-    snapped_lon = models.FloatField(default=0)
+    lattitude = models.FloatField(default=Constants.null_lat)
+    longitude = models.FloatField(default=Constants.null_lon)
+    snapped_lat = models.FloatField(default=Constants.null_lat)
+    snapped_lon = models.FloatField(default=Constants.null_lon)
     # in kmph
-    speed = models.FloatField(default=-1)
+    speed = models.FloatField(default=Constants.null_speed)
     # in meters
-    accuracy = models.FloatField(default=-1)
+    accuracy = models.FloatField(default=Constants.null_accuracy)
     # in degree
-    bearing = models.FloatField(default=-1)
+    bearing = models.FloatField(default=Constants.null_bearing)
 
     def __str__(self):
         # this gives you a list of dicts
@@ -125,16 +128,16 @@ class Grid(models.Model):
 
 
 class PotholeCluster(models.Model):
-    center_lat = models.FloatField(default=0)
-    center_lon = models.FloatField(default=0)
-    snapped_lat = models.FloatField(default=0)
-    snapped_lon = models.FloatField(default=0)
+    center_lat = models.FloatField(default=Constants.null_lat)
+    center_lon = models.FloatField(default=Constants.null_lon)
+    snapped_lat = models.FloatField(default=Constants.null_lat)
+    snapped_lon = models.FloatField(default=Constants.null_lon)
     # avgspeed  in kmph
-    speed = models.FloatField(default=-1)
+    speed = models.FloatField(default=Constants.null_speed)
     # in meters
-    accuracy = models.FloatField(default=-1)
+    accuracy = models.FloatField(default=Constants.null_accuracy)
     # avg bearing in degree
-    bearing = models.FloatField(default=-1)
+    bearing = models.FloatField(default=Constants.null_bearing)
     grid = models.ForeignKey(
         Grid,
         on_delete=models.SET_NULL,
@@ -204,9 +207,9 @@ class Pothole(models.Model):
         null=True,
         blank=True
     )
-    sd = models.FloatField(default=-1)
-    max_min = models.FloatField(default=-1)
-    intensity = models.FloatField(default=-100)
+    sd = models.FloatField(default=Constants.null_sd)
+    max_min = models.FloatField(default=Constants.null_max_min)
+    intensity = models.FloatField(default=Constants.null_intensity)
 
     def __str__(self):
         raw_data = serialize('python', [self])
@@ -215,12 +218,11 @@ class Pothole(models.Model):
 
 
 class GroundTruthPotholeLocation(models.Model):
-    latitude = models.FloatField(default=0)
-    longitude = models.FloatField(default=0)
+    latitude = models.FloatField(default=Constants.null_lat)
+    longitude = models.FloatField(default=Constants.null_lon)
     description = models.TextField(blank=True, null=True)
     reported_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return "lat:{}, lon:{}, desc:{}, date:{}".format(self.latitude, self.longitude, self.description,
                                                          self.reported_date)
-   
